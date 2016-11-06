@@ -1,0 +1,199 @@
+/* manages the logo */
+div.logo {
+	padding-top: 10px;
+	padding-bottom: 25px;
+}
+
+.logo img {
+  padding-left: 10px;
+	padding-right: 5px;
+	position: fixed;
+	left: 0px;
+	z-index: 100;
+}
+
+.logo p {
+  font: 16px/20px Arial, sans-serif;
+  color: #0054A0 !important;
+  padding-left: 5px;
+	position: fixed;
+	left: 70px;
+	z-index: 100;
+}
+
+/* inserts copyright */
+.copyright {
+  color: #555555;
+  text-align: left;
+  position: absolute;
+  left: 0px;
+  bottom: 0px;
+  padding: 10px;
+  z-index: 100;
+	font-size: 150%;
+}
+
+
+/* makes title slide white as well */
+.reveal .state-background {
+  background: #FFFFFF !important;
+}
+
+/* pushes content further to top */
+.reveal .slides > section {
+  top: -60% !important;
+}
+
+/* removes shadow from the title and makes slightly smaller*/
+.reveal h1 {
+  color: #555555 !important;
+  text-shadow: none !important;
+  font-size: 1.6em !important;
+}
+
+/* makes all text a consistent color */
+.reveal h2, h3 ,h4 ,h5, h6, p {
+  color: #555555 !important;
+}
+
+/* stops title hyphenating if too long */
+.reveal h1, .reveal h2, .reveal h3 {
+  word-wrap: normal;
+  -moz-hyphens: none;
+}
+
+.reveal pre {
+  margin-top: 30px;
+}
+
+/* makes code blocks smaller text */
+.reveal pre code {
+  font-size: 1em;
+  word-break: break-all;
+}
+
+/* force R code blocks at .9em */
+.reveal code.r {
+  font-size: .9em;
+}
+
+.reveal sup {
+  vertical-align: super;
+  font-size: 60% !important;
+}
+
+.code-div {
+  margin-top: 10px !important;
+  max-width: 95% !important;
+  border: 1px solid #ccc !important;
+  padding: 10px !important;
+  margin-bottom: 1em !important;
+  display: block !important;
+  position: relative !important;
+  width: 90% !important;
+  margin: 15px auto !important;
+  text-align: left !important;
+  font-family: monospace !important;
+  font-size: .7em !important;
+  line-height: 1.2em !important;
+  word-wrap: break-word !important;
+  box-shadow: 0 0 6px rgba(0,0,0,.3) !important;
+}
+
+.longer-list li{
+ font-size:75% !important;
+}
+
+.reveal ol, .reveal ul {
+  margin: 0 !important;
+}
+
+/* default placement of images is center */
+.midcenter {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+}
+
+.photobanner p {
+  text-align: left;
+  display: block;
+  padding-bottom: 20px;
+ }
+ 
+.photobanner img {
+  float: left;
+  height: 100px;
+  width: 100px;
+ }
+ 
+.photobanner span {
+  font-size: 25px;
+  padding-left: 10px;
+  vertical-align: middle;
+ }
+ 
+.photobanner .item2 {
+  font-size: 25px;
+  padding-left: 10px;
+  vertical-align: middle;
+  align: left;
+  }
+
+/* inserts footer */
+.footer {
+  color: #555555 !important;
+  text-align: left !important;
+  position: absolute !important;
+  left: 0px !important;
+  bottom: 0px !important;
+  padding: 10px !important;
+  z-index: 100 !important;
+	font-size: .5em !important;
+}
+
+.footer2 {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  color: #555555 !important;
+  text-align: left !important;
+  position: absolute !important;
+  left: 0px !important;
+  bottom: 0px !important;
+  padding: 10px !important;
+  z-index: 100 !important;
+	font-size: 75% !important;
+}
+
+blockquote {
+  display: block !important;
+  margin-top: 10px !important;
+  margin-bottom: 5px !important;
+  margin-left: 35px !important;
+  margin-right: 35px !important;
+  background-color: #cadef6 !important;
+  border-radius: 10px !important;
+  padding: 8px !important;
+  border-color: #1f63b6 !important;
+  border-width: 1px !important;
+  border-style: solid !important;
+}
+
+.wrapper {
+  display: table;
+}
+
+.wrapper ul {
+  display: table-cell;
+  vertical-align: top;
+}
+
+.wrapper img {
+  margin: 100px !important;
+  display: table-cell;
+  vertical-align: top;
+}
+
+.extra-li-top-pad li {
+  padding-top: 20px !important;
+}
