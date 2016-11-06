@@ -1,0 +1,249 @@
+---
+title: "Not so standard graphics in R"
+author: "Patrick Kilduff"
+date: "`r format(Sys.time(), '%Y %B %d')`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    collapsed: true
+    code_folding: hide
+    fig_width: 10
+    fig_height: 10
+    fig_caption: yes
+    force_captions: yes
+    highlight: pygments
+    number_sections: yes
+    theme: paper
+---
+heat maps, contour plots, star plots, solstice plots
+
+```{r install-packages-if-needed, echo=FALSE, eval=F, message=FALSE, error= FALSE, cache=FALSE}
+
+install.packages("readr")
+install.packages("dplyr")
+install.packages("grid")
+install.packages("scales")
+install.packages("googleVis")
+install.packages("plotly")
+install.packages("vegan")
+install.packages("rbokeh")
+install.packages("dygraphs")
+devtools::install_github("hadley/ggplot2")
+devtools::install_github("hrbrmstr/hrbrmisc")
+
+```
+
+
+```{r load-packages, message=FALSE, error= FALSE, cache=FALSE}
+# some packages leave a trail of notes you don't want in your output file.
+suppressWarnings(suppressPackageStartupMessages(library(ggplot2)))
+suppressWarnings(suppressPackageStartupMessages(library(hrbrmisc)))
+suppressWarnings(suppressPackageStartupMessages(library(readr)))
+suppressWarnings(suppressPackageStartupMessages(library(dplyr)))
+suppressWarnings(suppressPackageStartupMessages(library(grid)))
+suppressWarnings(suppressPackageStartupMessages(library(scales)))
+suppressWarnings(suppressPackageStartupMessages(library(plotly)))
+suppressWarnings(suppressPackageStartupMessages(library(dygraphs)))
+suppressWarnings(suppressPackageStartupMessages(library(googleVis)))
+suppressWarnings(suppressPackageStartupMessages(library(rbokeh)))
+suppressWarnings(suppressPackageStartupMessages(library(vegan)))
+
+# a palette of colorblind friendly colors (first color = grey)
+# http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/
+cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73",
+               "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
+```
+
+
+# Not-so-standard-graphics-in-R
+
+Tonight we'll take a look at a number plots that should be different than the bread and butter scatter plots and boxplots and barplots that we usually make. Some plots will be different takes on the basic ideas, some will take advantage of interactive functionality, some might be handy, and a few are just plain fun/cool/geeky. Hopefully, some of these will inspire you to adapt these types of plots for your own needs [so long as they help clarify the "data story" you've got to tell!].
+
+
+## Mosaic plots
+
+http://www.cyclismo.org/tutorial/R/intermediatePlotting.html
+
+> Mosaic plots are used to display proportions for tables that are divided into
+> two or more conditional distributions. Here we focus on two way tables to keep
+> things simpler. It is assumed that you are familiar with using tables in R (see
+> the section on two way tables for more information: Two Way Tables).
+
+> Here we will use a made up data set primarily to make it easier to figure out
+> what R is doing. The fictitious data set is defined below. The idea is that 
+> sixteen children of age eight are interviewed. They are asked two questions.
+> The first question is, “do you believe in Santa Claus.” If they say that they
+> do then the term “belief” is recorded, otherwise the term “no belief” is
+> recorded. The second question is whether or not they have an older brother,
+> older sister, or no older sibling. (We are keeping it simple here!) The answers
+> that are recorded are “older brother,” “older sister,” or “no older sibling.”
+
+
+
+```{r make-santa-data, message=FALSE, error= FALSE, cache=FALSE}
+
+santa <- data.frame(belief=c('no belief','no belief','no belief','no belief',
+                               'belief','belief','belief','belief',
+                               'belief','belief','no belief','no belief',
+                               'belief','belief','no belief','no belief'),
+                      sibling=c('older brother','older brother','older brother','older sister',
+                                'no older sibling','no older sibling','no older sibling','older sister',
+                                'older brother','older sister','older brother','older sister',
+                                'no older sibling','older sister','older brother','no older sibling')
+                      )
+
+```
+
+
+```{r}
+# plot(santa$belief)
+
+```
+
+```{r}
+# plot(santa$sibling)
+```
+
+```{r}
+# plot(santa$sibling,santa$belief)
+```
+
+```{r santa-mosaic, message=FALSE, error= FALSE, cache=FALSE}
+totals <- table(santa$belief,santa$sibling)
+
+mosaicplot(totals,main="Older Brothers are Jerks",
+           xlab="Belief in Santa Claus",ylab="Older Sibling", 
+           col = cbPalette[2:4])
+```
+
+
+## Interactive graphics
+
+I spend lots of time trying to get plots just right to look good on printed paper, but I can only wonder how much longer that will be the focus of statistical graphics as printed journals, papers, magazines decline in circulation. Making plots that you look at on the screen opens up a several cans of worms [the good kind] for conveying information to your audience and getting information out of your data.
+
+Interactive graphics can also be very helpful for exploring data sets - and there are more tools in R than I've had time to familiarize myself with. I've used `dygraphs` and played around with RStudio's `ggvis` and `manipulator` packages. 
+
+
+### Animated bubble plots, made easy with `googleVis`
+
+A few years ago the [this TED talk](http://www.ted.com/talks/hans_rosling_shows_the_best_stats_you_ve_ever_seen) by Hans Rosling got lots of attention for drawing attention to "developing" world demographics. The big draw of the presentation was that the data were plotted dynamicly - the plot automatically cycled through all years for all countries one year at a time.
+
+Here's a simple version using the package `googleVis`Do the [Hans Rosling](https://jeffreybreen.wordpress.com/2011/07/14/r-one-liners-googlevis/). When run as a regular script, the plot opens in a web browser. In this `.Rmd` file, the plot opens in the Preview window but the plot does not open in `.html` fire in either Firefox or Safari. Does this run in Chrome?
+
+```{r hans-rosling-like-plot, message=FALSE, error= FALSE, cache=FALSE,  results='asis', tidy=FALSE, }
+
+
+data(Fruits)
+M <- gvisMotionChart(data=Fruits, idvar="Fruit", timevar="Date", chartid="ILoveFruit")
+M
+```
+
+
+
+### `plotly`
+
+#### box plot
+
+
+```{r plotly-box-plot, message=FALSE, error= FALSE, cache=FALSE}
+
+
+p <- plot_ly(midwest, x = percollege, color = state, type = "box")
+p
+# plotly_POST publishes the figure to your plotly account on the web
+# plotly_POST(p, filename = "r-docs/midwest-boxplots", sharing='public')
+
+
+```
+
+#### Dot plot
+
+```{r plotly-dot-plot, message=FALSE, error= FALSE, cache=FALSE}
+s <- read.csv("https://raw.githubusercontent.com/plotly/datasets/master/school_earnings.csv")
+s <- s[order(s$Men), ]
+library(plotly)
+p <- plot_ly(s, x = Women, y = School, name = "Women",
+             mode = "markers", marker = list(color = "pink")) %>%
+  add_trace(x = Men, name = "Men", y = School, marker = list(color = "blue"),
+            mode = "markers") %>%
+  layout(
+    title = "Gender earnings disparity",
+    xaxis = list(title = "Annual Salary (in thousands)"),
+    margin = list(l = 65)
+  )
+p
+```
+
+
+### `dygraphs`
+
+Plotting time series
+
+```{r time-series-with-dygraphs, message=FALSE, error= FALSE, cache=FALSE}
+
+
+dygraph(nhtemp, main = "New Haven Temperatures") %>% 
+  dyRangeSelector(dateWindow = c("1920-01-01", "1960-01-01"))
+
+```
+
+### `rbokeh`
+
+```{r interactivity-with-bokeh, message=FALSE, error= FALSE, cache=FALSE}
+figure(width = NULL, height = NULL) %>%
+  ly_points(Sepal.Length, Sepal.Width, data = iris,
+    color = Species, glyph = Species,
+    hover = list(Sepal.Length, Sepal.Width))
+```
+
+
+## Customizing generic plots
+
+Using base plot to pretty up a generic plot
+
+```{r load-BCI-data}
+
+data(BCI)
+data(BCI.env)
+
+dim(BCI)
+dplyr::tbl_df(BCI[,1:4])
+dim(BCI.env)
+dplyr::tbl_df(BCI.env)
+```
+
+## Constrained ordination: redundance analysis (RDA)
+
+~PCA on predicted values after running multiple linear regressions on a ser  after pull out )
+
+Example data: The abundance of several species (columns) at multiple sites (rows). Another data set contains the environmental (explanatory) variables at each site.
+
+```{r multivariate_plot2, }
+
+bci_rda <- rda(BCI ~ UTM.EW + UTM.NS + Precipitation + Elevation + Age.cat + Geology + Habitat + Stream + EnvHet, data = BCI.env)
+
+```
+
+A basic
+
+```{r multivariate_plot3}
+
+# plot(bci_rda) # this line does the same as the next
+ordiplot(bci_rda)
+
+```
+
+
+```{r}
+
+plot(bci_rda)
+
+
+
+```
+
+
+
+

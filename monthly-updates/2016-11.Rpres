@@ -1,0 +1,37 @@
+<div class="logo">
+  <a href="http://www.meetup.com/757-R-Users-Group/" target="_blank">
+  <img src="../757-rug-logo.png" alt="logo">
+  </a>
+</div>
+
+<div class="copyright">
+757 R User Group: <a href="http://www.meetup.com/757-R-Users-Group/" target="_blank">http://www.meetup.com/757-R-Users-Group/</a>
+</div>
+
+757 R Users Group
+========================================
+author: Regular Meeting
+date: `r format(as.Date('2016-11-15'), format="%B %d, %Y")`
+css: ../757-rug-presentations.css
+
+WiFi
+========================================
+
+<br>
+<span style="font-size:150%;color:black;">Getting on Library WiFi: </span><br>
+<br>
+<span style="font-size:140%;"><u>Network Key</u>: nplwireless (first time only)</span><br><br>
+<span style="font-size:140%;"><u>Username</u>: nplguest</span><br><br>
+<span style="font-size:140%;"><u>Password</u>: nplguest</span><br><br>
+<br>
+
+No December 757 RUG Meeting
+========================================
+
+<div class="footer">
+&nbsp;&nbsp;Image from: <a href="http://hutchinsonbear.com/3315/news/holiday-break/">http://hutchinsonbear.com/3315/news/holiday-break/</a>
+</div>
+<br>
+<div class="midcenter" style="margin-left:-380px; margin-top:-225px; width:103%;">
+  <img style="width:80%;" src="./img/winter-break.jpg" alt="winter-break">
+</div>

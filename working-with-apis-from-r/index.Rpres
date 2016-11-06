@@ -1,0 +1,277 @@
+<div class="logo">
+  <a href="http://www.meetup.com/757-R-Users-Group/" target="_blank">
+  <img src="../757-rug-logo.png" alt="logo">
+  </a>
+</div>
+
+<div class="copyright">
+757 R User Group: <a href="http://www.meetup.com/757-R-Users-Group/" target="_blank">http://www.meetup.com/757-R-Users-Group/</a>
+</div>
+
+Working with APIs from R
+========================================
+author: Steve Mortimer
+date: `r gsub(" 0", " ", format(as.Date('2016-11-15'), format="%B %d, %Y"))`
+css: ../757-rug-presentations.css
+
+```{r setup, include=FALSE}
+  library(knitr)
+  knitr::opts_chunk$set(echo=TRUE, eval=TRUE)
+```
+
+```{r load-packages, echo=FALSE, warning=FALSE, error=FALSE, message=FALSE}
+  options(stringsAsFactors = FALSE)
+  library(dplyr)
+  library(httr)
+  library(purrr)
+  library(jsonlite)
+  library(xml2)
+  library(XML)
+```
+
+
+2 Common Webservice API Types
+====================================
+
+<div class="footer2">
+<blockquote cite="">
+<b>Resources:</b><br>
+<a href="http://spf13.com/post/soap-vs-rest">The Difference Between SOAP and REST</a><br>
+<a href="http://www.soapui.org/testing-dojo/world-of-api-testing/soap-vs--rest-challenges.html">SOAP vs REST Challenges</a>
+</blockquote>
+</div>
+
+<div class="column column1 slideContent">
+<span style="color:red">SOAP</span><br>
+<span style="font-size:65%;"><b><u>S</u></b>imple <b><u>O</u></b>bject <b><u>A</u></b>ccess <b><u>P</u></b>rotocol</span> 
+<ul>
+<li>Protocol agnostic <br><span style="font-size:60%;">(HTTP, SMTP, TCP, or JMS)</span></li>
+<li>Typically XML</li>
+<li>Strongly Typed</li>
+<li>Definitions provided by WSDL <span style="font-size:55%;">(<b><u>W</u></b>eb <b><u>S</u></b>ervice <b><u>D</u></b>escription <b><u>L</u></b>anguage)</span></li>
+</ul>
+</div><br>
+
+<div class="column column2 slideContent">
+<span style="color:red">REST</span><br>
+<span style="font-size:65%;"><b><u>Re</u></b>presentational <b><u>S</u></b>tate <b><u>T</u></b>ransfer</span>
+<ul>
+<li>Noun-Verb Paradigm <br><span style="font-size:60%;">(HTTP GET/POST/PUT/DELETE)</span></li>
+<li>Typically formatted as JSON <span style="font-size:55%;">(<b><u>J</u></b>ava<b><u>s</u></b>cript <b><u>O</u></b>bject <b><u>N</u></b>otation)</span></li>
+</ul>
+</div><br>
+
+2 Common API Data Formats
+====================================
+<span style="color:red">XML</span>
+```{r, echo=FALSE, eval=TRUE}
+a = newXMLNode("person",
+               newXMLNode("firstname", "Rick"),
+               newXMLNode("lastname", "James"),
+               newXMLNode("occupation", "legend")
+               )
+a
+```
+<ul>
+<li>Favored by SOAP APIs</li>
+<li>Traditional format</li>
+</ul>
+***
+<span style="color:red">JSON</span>
+```{r, echo=FALSE, eval=TRUE}
+a <- list(person=list(firstname="Rick", 
+                      lastname="James", 
+                      occupation="legend"))
+cat(toJSON(a, pretty=T, auto_unbox=TRUE))
+```
+<ul>
+<li>Favored by REST APIs</li>
+<li>A more modern, flexible approach</li>
+</ul>
+
+HTTP
+====================================
+
+<div class="footer2">
+<blockquote cite="">
+<b>Resources:</b><br>
+<a href="https://github.com/ropensci/user2016-tutorial/blob/master/slides.pdf">Extracting data from the web: APIs and beyond</a>
+</blockquote>
+</div>
+
+<ul>
+  <li>Verbs for different actions
+    <ul style="padding-left:40px;">
+      <li>
+        GET, PUT, POST, DELETE
+      </li>
+    </ul>
+  </li>
+  <li>Authentication
+    <ul style="padding-left:40px;">
+      <li>
+        None, Basic, OAuth 2.0
+      </li>
+    </ul>
+  </li>
+  <li>Status codes
+    <ul style="padding-left:40px;">
+      <li>
+        200, 404, 403, 500
+      </li>
+    </ul>
+  </li>
+  <li>
+    Use httr for managing HTTP requests in R<br>
+    <div style="font-size:60% !important;" class="code-div">
+      install.packages('httr')
+    </div>
+  </li>
+</ul>
+
+Required Packages
+====================================
+
+<br>
+Before you get started Run the snippet of code below
+
+```{r demo-load-packages, eval=FALSE, echo=TRUE, warning=FALSE, error=FALSE, message=FALSE}
+options(stringsAsFactors = FALSE)
+library(dplyr)
+library(purrr)
+library(httr)
+library(jsonlite)
+library(xml2)
+
+# all of these packages are part of the tidyverse
+# so you could run:
+# install.packages('tidyverse'); library(tidyverse)
+```
+
+API No Authentication (Just GET the URL)
+====================================
+```{r, echo=TRUE, eval=TRUE}
+resp <- GET(paste0('http://www.omdbapi.com/',
+                   '?t=The+Godfather&plot=short&r=xml'))
+resp
+parsed_xml <- read_xml(content(resp, as="raw"))
+parsed_xml
+```
+
+Parsing Many Elements
+====================================
+```{r, echo=TRUE, eval=TRUE}
+resp <- GET(paste0('http://www.omdbapi.com/',
+                   '?s=The+Godfather&plot=short&r=xml'))
+resp
+parsed_xml <- read_xml(content(resp, as="raw"))
+parsed_xml
+```
+
+Parsing Many Elements (cont.)
+====================================
+```{r, echo=TRUE, eval=TRUE}
+search_results <- parsed_xml %>% 
+  xml_find_all('result') %>% 
+  map(as_list) %>%
+  map_df(function(x) as.data.frame(attributes(x)))
+head(search_results[c('title', 'year', 'imdbID', 'type')])
+```
+
+break-after-no-auth-GET
+====================================================
+title: false
+<h3>
+  <div class="midcenter" style="margin-left:-400px; margin-top:-300px;">
+  Break</br></br></br><span style="font-weight: 700; color:#25679E;">I can:</span></br>Grab Data from an API with No Authentication
+  </div>
+</h3>
+
+
+API with Basic Authentication
+====================================
+
+* find examples demonstrating basic authentication
+* username password
+* discuss "digest" and encryption here
+* maybe talk about pros/cons
+https://blog.risingstack.com/web-authentication-methods-explained/
+
+
+break-after-basic-auth
+====================================================
+title: false
+<h3>
+  <div class="midcenter" style="margin-left:-400px; margin-top:-300px;">
+  Break</br></br></br><span style="font-weight: 700; color:#25679E;">I can:</span></br>Grab Data from an API with Basic Authentication
+  </div>
+</h3>
+
+
+API with Token/OAuth 2.0 Authentication
+====================================
+
+* OAuth is application specific (Google, Facebook, Twitter)
+* The user must register with these services first, typically
+as an "application" that acts on teh users behalf
+
+```{r, echo=TRUE, eval=TRUE}
+
+# Using Norfolk Data Science's key and secret if you want you 
+# can register your own at:
+# https://cloud.google.com/console#/project
+key <- "414258752185-ln3is61lrs8r5jtq8695anopmplbjl4d.apps.googleusercontent.com"
+secret <- "hPMYGZWmvNN9iqIRxkCeCWGy"
+myapp <- oauth_app("google", key, secret)
+
+```
+
+API with Token/OAuth 2.0 Authentication
+====================================
+
+* Use the application to get a token
+* Tokens have a "scope" the breadth of services
+that the application is allowed to access
+
+```{r, echo=TRUE, eval=TRUE}
+# get the OAuth token
+# this example requires a Google Drive account
+google_token <- oauth2.0_token(oauth_endpoints("google"), 
+                               myapp,
+                               scope = c("https://www.googleapis.com/auth/drive"),
+                               cache = TRUE)
+
+```
+
+API with Token/OAuth 2.0 Authentication
+====================================
+
+* After you get your token, it's easy! Simply pass it
+along as an argument to the `GET` function
+
+```{r, echo=TRUE, eval=TRUE}
+
+# give your token to "GET" along with the URL
+url <- 'https://www.googleapis.com/drive/v2/about'
+req <- GET(url, google_token)
+
+# parse the response
+your_drive_metadata <- content(req, 'parsed')
+your_drive_metadata$user[c(2,6)]
+
+# calculate your GDrive Usage Percentage
+sprintf("%1.2f%%", 100 * 
+          as.numeric(your_drive_metadata$quotaBytesUsed) / 
+          as.numeric(your_drive_metadata$quotaBytesTotal))
+
+```
+
+break-after-token-auth
+====================================================
+title: false
+<h3>
+  <div class="midcenter" style="margin-left:-400px; margin-top:-300px;">
+  Break</br></br></br><span style="font-weight: 700; color:#25679E;">I can:</span></br>Grab Data from an API with Token or OAuth 2.0 Authentication
+  </div>
+</h3>
+

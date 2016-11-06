@@ -1,0 +1,566 @@
+---
+title: "Sample Charts"
+author: "Steve Mortimer"
+date: "`r format(Sys.time(), '%Y %B %d')`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    collapsed: true
+    code_folding: hide
+    fig_width: 10
+    fig_height: 10
+    fig_caption: yes
+    force_captions: yes
+    highlight: pygments
+    number_sections: yes
+    theme: paper
+  pdf_document:
+    fig_caption: yes
+    keep_tex: yes
+    number_sections: yes
+---
+
+# Introduction
+
+The following chart examples require packages that you might not have currently
+installed on your local machine. Please run this first chunk of code before
+proceeding if you do not have these packages.
+
+```{r install-packages, echo=T, eval=F}
+install.packages('devtools')
+install.packages('magrittr')
+install.packages('xml2') ##### Work with XML files using a simple, consistent interface.
+install.packages('purrr') ##### Functional programming tools for R
+install.packages('plyr')
+install.packages('dplyr')
+install.packages('tidyr')
+install.packages('stringr')
+install.packages('knitr')
+install.packages('readr')
+install.packages('tsne') ##### t-distributed stochastic neighbor embedding
+##### Wikipedia's description: It is a nonlinear dimensionality reduction technique
+##### that is particularly well-suited for embedding high-dimensional data into a
+##### space of two or three dimensions, which can then be visualized in a scatter # ##### plot.
+install.packages('ggplot2')
+install.packages('highcharter') ##### A wrapper for the 'Highcharts' library including shortcut functions to plot R objects.
+##### 'Highcharts' <http://www.highcharts.com/> is a charting library offering
+##### numerous chart types with a simple configuration syntax.
+devtools::install_github('rstudio/htmltools') ##### Tools for HTML generation and output.
+devtools::install_github('rstudio/leaflet')  ##### Leaflet is one of the most
+##### popular open-source JavaScript libraries for interactive maps. 
+##### R package for integrating and controling Leaflet maps in R.
+devtools::install_github('rich-iannone/DiagrammeR')
+```
+
+``` {r global_parms, echo=FALSE, eval=TRUE, warning=FALSE, cache=FALSE}
+
+options(stringsAsFactors=FALSE, scipen=999)
+
+suppressWarnings(suppressPackageStartupMessages(library(knitr)))
+knitr::opts_chunk$set(results='asis', echo=TRUE, eval=TRUE,
+                      cache=FALSE, message = FALSE, warning = FALSE)
+
+```
+
+Load the packages necessary for doing some charting
+
+```{r load-packages, echo=T}
+suppressWarnings(suppressPackageStartupMessages(library(tsne)))
+suppressWarnings(suppressPackageStartupMessages(library(plyr)))
+suppressWarnings(suppressPackageStartupMessages(library(dplyr)))
+suppressWarnings(suppressPackageStartupMessages(library(tidyr)))
+suppressWarnings(suppressPackageStartupMessages(library(xml2)))
+suppressWarnings(suppressPackageStartupMessages(library(readr)))
+suppressWarnings(suppressPackageStartupMessages(library(purrr)))
+suppressWarnings(suppressPackageStartupMessages(library(ggplot2)))
+suppressWarnings(suppressPackageStartupMessages(library(highcharter)))
+suppressWarnings(suppressPackageStartupMessages(library(htmltools)))
+suppressWarnings(suppressPackageStartupMessages(library(stringr)))
+suppressWarnings(suppressPackageStartupMessages(library(rvest)))
+suppressWarnings(suppressPackageStartupMessages(library(leaflet)))
+suppressWarnings(suppressPackageStartupMessages(library(DiagrammeR)))
+suppressWarnings(suppressPackageStartupMessages(library(magrittr)))
+```
+
+# Pie Charts in `ggplot2`
+
+Pie charts are generally frowned upon, but it's possible to make them in ggplot and the
+way to create them is using polar coordinates, which is an interesting workaround
+for a bar chart.
+
+```{r pie-chart-data, echo=F}
+iris_distribution <- as.data.frame(prop.table(table(iris$Species)))
+names(iris_distribution) <- c('Species', 'Proportion')
+
+```
+
+```{r pie-chart-plot, echo=T}
+ggplot(data=iris_distribution,
+         aes(x=factor(1),
+         y=Proportion,
+         fill = factor(Species))) + 
+ geom_bar(width = 1, colour="black", stat="identity") + 
+ coord_polar(theta="y") +
+ xlab('Proportion of Total') +
+ ylab('') +
+ labs(fill='Species')	+
+ scale_x_discrete(breaks=NULL)+
+ scale_y_continuous(breaks=seq(0, .75, 0.25),labels=c("100% / 0%","25%","50%","75%")) + 
+ theme(panel.grid.major = element_blank())
+```
+
+# Interactive mapping with `leaflet`
+
+Imagine you own Capital Bikeshare in DC. What is the shortest path to every single kiosk in the
+city of Washington, DC? This problem can be solved by downloading the latitude and longitude
+coordinates of each bike share location and then running an algorithm over those points
+to determine the shortest path. Assuming you've loaded the TSP package and run the solution
+here is an interesting visualization of the optimal path.
+
+```{r load-leaflet-tsp-data, echo=F}
+data <- structure(list(latitude = c(38.92469, 38.924646, 38.921263, 38.922168, 
+38.918765, 38.916857, 38.905218, 38.905476, 38.903559, 38.901133, 
+38.902078, 38.90149, 38.898837, 38.904986, 38.906431, 38.906435, 
+38.896277, 38.896423, 38.893588, 38.885983, 38.884449, 38.883947, 
+38.885531, 38.886919, 38.886669, 38.888853, 38.886216, 38.892595, 
+38.892934, 38.897148, 38.897961, 38.896764, 38.891852, 38.888027, 
+38.888301, 38.883832, 38.882348, 38.88073, 38.882752, 38.884181, 
+38.882075, 38.870938, 38.874046, 38.87492, 38.87344, 38.866297, 
+38.863403, 38.858684, 38.863313, 38.860892, 38.861129, 38.843038, 
+38.838929, 38.835598, 38.829601, 38.827425, 38.833408, 38.837364, 
+38.834783, 38.833856, 38.833648, 38.830615, 38.837071, 38.842278, 
+38.849709, 38.845999, 38.855555, 38.857391, 38.869303, 38.869939, 
+38.872104, 38.87351, 38.87587, 38.873638, 38.871136, 38.868376, 
+38.88017, 38.881183, 38.883001, 38.885538, 38.885501, 38.89207, 
+38.891676, 38.886206, 38.889225, 38.885703, 38.888698, 38.891268, 
+38.893627, 38.902301, 38.90248, 38.903246, 38.902925, 38.903461, 
+38.900086, 38.897321, 38.902678, 38.907002, 38.906193, 38.919268, 
+38.921747, 38.930069, 38.929172, 38.931497, 38.934918, 38.934875, 
+38.936715, 38.939416, 38.941603, 38.95008, 38.955897, 38.95659, 
+38.955633, 38.956787, 38.960796, 38.962518, 38.96785, 38.968379, 
+38.974502, 38.980954, 38.980572, 38.983378, 38.984523, 38.985747, 
+38.98798, 38.980858, 38.976661, 38.971688, 38.967111, 38.966864, 
+38.964767, 38.963521, 38.960559, 38.96098, 38.958061, 38.955217, 
+38.955204, 38.954028, 38.952482, 38.95169, 38.948451, 38.948675, 
+38.945128, 38.948053, 38.943689, 38.94197, 38.941506, 38.945442, 
+38.945373, 38.94164, 38.939952, 38.932086, 38.932364, 38.930497, 
+38.927824, 38.920329, 38.920371, 38.921344, 38.923367, 38.925589, 
+38.928918, 38.930385, 38.930385, 38.93387, 38.934762, 38.93211, 
+38.944474, 38.950393, 38.958927, 38.968968, 38.967822, 38.96562, 
+38.965141, 38.968397, 38.962607, 38.953066, 38.956242, 38.95447, 
+38.951808, 38.949498, 38.948993, 38.934471, 38.931537, 38.931946, 
+38.925207, 38.922543, 38.923584, 38.91996, 38.917885, 38.927799, 
+38.936486, 38.935688, 38.931635, 38.929518, 38.929345, 38.920851, 
+38.918425, 38.918972, 38.917513, 38.91355, 38.909844, 38.90622, 
+38.906434, 38.906955, 38.916704, 38.913915, 38.913814, 38.910956, 
+38.909965, 38.913575, 38.914689, 38.916089, 38.916776, 38.915226, 
+38.912859, 38.910569, 38.907719, 38.907379, 38.900493, 38.903168, 
+38.903871, 38.905029, 38.908749, 38.91045, 38.910906, 38.912033, 
+38.914653, 38.912813, 38.913221, 38.91529, 38.917247, 38.917933, 
+38.920399, 38.921942, 38.925082, 38.928662, 38.929305, 38.929135, 
+38.928912, 38.930892, 38.92891, 38.934249, 38.933307), longitude = c(-76.978702, 
+-76.99059, -76.997534, -77.002985, -77.001814, -76.999135, -77.001496, 
+-77.00005, -76.993221, -76.993063, -76.989093, -76.988621, -76.983047, 
+-76.985906, -76.9806, -76.978719, -76.973281, -76.974288, -76.981154, 
+-76.977936, -76.981989, -76.983447, -76.984412, -76.985745, -76.986616, 
+-76.988634, -76.992408, -76.996372, -76.992413, -76.992395, -76.997333, 
+-76.998661, -77.005538, -77.000781, -76.999742, -76.997361, -76.991819, 
+-76.993533, -77.004064, -77.004803, -77.022412, -77.016675, -77.011539, 
+-77.01159, -76.992401, -76.988457, -76.98242, -76.986088, -76.989413, 
+-76.993419, -76.997192, -77.019541, -77.0219, -77.016727, -77.023423, 
+-77.008389, -77.007389, -77.011409, -77.004059, -76.99795, -76.996361, 
+-76.991721, -76.990945, -76.986051, -76.9842, -76.972549, -76.962725, 
+-76.958568, -76.968034, -76.972432, -76.970186, -76.968042, -76.965204, 
+-76.962678, -76.952488, -76.942321, -76.931564, -76.942278, -76.94034, 
+-76.942666, -76.94327, -76.948542, -76.941061, -76.936297, -76.932455, 
+-76.919518, -76.91947, -76.925797, -76.923993, -76.922726, -76.92515, 
+-76.927256, -76.929915, -76.934427, -76.939458, -76.941893, -76.943012, 
+-76.941122, -76.950338, -76.954753, -76.955459, -76.965304, -76.972423, 
+-76.966477, -76.965717, -76.967353, -76.970934, -76.976961, -76.976511, 
+-76.988523, -76.992291, -76.993437, -76.998161, -77.008228, -77.000789, 
+-77.00209, -77.008818, -77.010484, -77.020733, -77.024163, -77.029239, 
+-77.029954, -77.032555, -77.031797, -77.044239, -77.054722, -77.055576, 
+-77.028209, -77.021462, -77.020829, -77.021035, -77.019691, -77.022671, 
+-77.017786, -77.013406, -77.018456, -77.018935, -77.022373, -77.021892, 
+-77.024296, -77.027837, -77.018831, -77.016727, -77.007096, -77.009815, 
+-77.01687, -77.018949, -77.019768, -77.026788, -77.030424, -77.028917, 
+-77.02481, -77.030634, -77.033913, -77.029118, -77.039613, -77.042655, 
+-77.048025, -77.049161, -77.044202, -77.037902, -77.03959, -77.039661, 
+-77.037394, -77.042165, -77.044458, -77.056286, -77.033153, -77.029959, 
+-77.055342, -77.05587, -77.060719, -77.063211, -77.074348, -77.077438, 
+-77.072046, -77.078104, -77.083262, -77.090849, -77.09362, -77.09976, 
+-77.084305, -77.088115, -77.106502, -77.102848, -77.102561, -77.099968, 
+-77.097714, -77.096921, -77.084738, -77.068053, -77.067285, -77.066023, 
+-77.060069, -77.056653, -77.073338, -77.074441, -77.071495, -77.072033, 
+-77.067488, -77.063495, -77.07043, -77.065048, -77.06345, -77.055444, 
+-77.052149, -77.04852, -77.049479, -77.038268, -77.039239, -77.039419, 
+-77.037732, -77.03051, -77.026685, -77.025277, -77.028744, -77.029879, 
+-77.027693, -77.018321, -77.016452, -77.010345, -77.011678, -77.01634, 
+-77.015458, -77.010031, -77.011169, -77.01283, -77.01553, -77.017982, 
+-77.017438, -77.017682, -77.009993, -77.014547, -77.017931, -77.017308, 
+-77.022949, -77.021286, -77.019964, -76.999274, -76.992335, -76.99104, 
+-76.981012, -76.97988), popup = structure(c(159L, 27L, 8L, 214L, 
+171L, 219L, 111L, 120L, 93L, 108L, 142L, 221L, 31L, 201L, 119L, 
+186L, 217L, 195L, 44L, 60L, 155L, 70L, 32L, 17L, 188L, 86L, 106L, 
+141L, 170L, 63L, 92L, 95L, 139L, 79L, 42L, 34L, 99L, 158L, 91L, 
+168L, 20L, 207L, 72L, 97L, 232L, 191L, 222L, 193L, 96L, 238L, 
+71L, 127L, 234L, 208L, 152L, 23L, 103L, 133L, 144L, 36L, 194L, 
+206L, 198L, 57L, 5L, 180L, 123L, 230L, 160L, 239L, 242L, 102L, 
+33L, 126L, 112L, 24L, 46L, 176L, 236L, 107L, 169L, 197L, 43L, 
+74L, 184L, 233L, 211L, 26L, 146L, 69L, 224L, 151L, 178L, 35L, 
+83L, 130L, 196L, 65L, 153L, 2L, 156L, 138L, 25L, 132L, 161L, 
+213L, 66L, 210L, 68L, 173L, 147L, 1L, 59L, 89L, 243L, 179L, 166L, 
+192L, 240L, 82L, 62L, 41L, 135L, 209L, 140L, 167L, 164L, 124L, 
+199L, 14L, 143L, 175L, 216L, 149L, 125L, 134L, 73L, 88L, 77L, 
+49L, 205L, 113L, 48L, 122L, 101L, 212L, 81L, 118L, 181L, 15L, 
+47L, 165L, 18L, 80L, 235L, 241L, 94L, 84L, 10L, 229L, 7L, 226L, 
+150L, 38L, 172L, 187L, 30L, 105L, 55L, 28L, 154L, 157L, 137L, 
+64L, 116L, 58L, 237L, 76L, 90L, 189L, 39L, 19L, 131L, 223L, 29L, 
+3L, 121L, 174L, 203L, 200L, 52L, 114L, 98L, 50L, 227L, 104L, 
+13L, 225L, 45L, 53L, 100L, 40L, 190L, 204L, 202L, 162L, 78L, 
+182L, 75L, 117L, 6L, 67L, 16L, 22L, 9L, 11L, 145L, 215L, 85L, 
+37L, 136L, 54L, 12L, 87L, 4L, 109L, 185L, 21L, 51L, 177L, 220L, 
+128L, 115L, 56L, 129L, 61L, 183L, 231L, 218L, 228L, 148L, 163L, 
+110L), .Label = c("Kiosk Location #1", "Kiosk Location #10", 
+"Kiosk Location #100", "Kiosk Location #101", "Kiosk Location #102", 
+"Kiosk Location #103", "Kiosk Location #104", "Kiosk Location #105", 
+"Kiosk Location #106", "Kiosk Location #107", "Kiosk Location #108", 
+"Kiosk Location #109", "Kiosk Location #11", "Kiosk Location #110", 
+"Kiosk Location #111", "Kiosk Location #112", "Kiosk Location #113", 
+"Kiosk Location #114", "Kiosk Location #115", "Kiosk Location #116", 
+"Kiosk Location #117", "Kiosk Location #118", "Kiosk Location #119", 
+"Kiosk Location #12", "Kiosk Location #120", "Kiosk Location #121", 
+"Kiosk Location #122", "Kiosk Location #123", "Kiosk Location #124", 
+"Kiosk Location #125", "Kiosk Location #126", "Kiosk Location #127", 
+"Kiosk Location #128", "Kiosk Location #129", "Kiosk Location #13", 
+"Kiosk Location #130", "Kiosk Location #131", "Kiosk Location #132", 
+"Kiosk Location #133", "Kiosk Location #134", "Kiosk Location #135", 
+"Kiosk Location #136", "Kiosk Location #137", "Kiosk Location #138", 
+"Kiosk Location #139", "Kiosk Location #14", "Kiosk Location #141", 
+"Kiosk Location #142", "Kiosk Location #143", "Kiosk Location #144", 
+"Kiosk Location #145", "Kiosk Location #146", "Kiosk Location #147", 
+"Kiosk Location #148", "Kiosk Location #149", "Kiosk Location #15", 
+"Kiosk Location #150", "Kiosk Location #151", "Kiosk Location #152", 
+"Kiosk Location #153", "Kiosk Location #154", "Kiosk Location #155", 
+"Kiosk Location #156", "Kiosk Location #157", "Kiosk Location #158", 
+"Kiosk Location #159", "Kiosk Location #16", "Kiosk Location #160", 
+"Kiosk Location #161", "Kiosk Location #162", "Kiosk Location #163", 
+"Kiosk Location #164", "Kiosk Location #165", "Kiosk Location #166", 
+"Kiosk Location #167", "Kiosk Location #168", "Kiosk Location #169", 
+"Kiosk Location #17", "Kiosk Location #170", "Kiosk Location #171", 
+"Kiosk Location #172", "Kiosk Location #173", "Kiosk Location #174", 
+"Kiosk Location #175", "Kiosk Location #176", "Kiosk Location #177", 
+"Kiosk Location #178", "Kiosk Location #179", "Kiosk Location #18", 
+"Kiosk Location #180", "Kiosk Location #181", "Kiosk Location #182", 
+"Kiosk Location #183", "Kiosk Location #184", "Kiosk Location #185", 
+"Kiosk Location #186", "Kiosk Location #187", "Kiosk Location #188", 
+"Kiosk Location #189", "Kiosk Location #19", "Kiosk Location #190", 
+"Kiosk Location #191", "Kiosk Location #192", "Kiosk Location #193", 
+"Kiosk Location #194", "Kiosk Location #195", "Kiosk Location #196", 
+"Kiosk Location #197", "Kiosk Location #198", "Kiosk Location #199", 
+"Kiosk Location #2", "Kiosk Location #20", "Kiosk Location #200", 
+"Kiosk Location #201", "Kiosk Location #202", "Kiosk Location #203", 
+"Kiosk Location #204", "Kiosk Location #205", "Kiosk Location #206", 
+"Kiosk Location #207", "Kiosk Location #208", "Kiosk Location #209", 
+"Kiosk Location #21", "Kiosk Location #210", "Kiosk Location #211", 
+"Kiosk Location #212", "Kiosk Location #213", "Kiosk Location #214", 
+"Kiosk Location #215", "Kiosk Location #216", "Kiosk Location #217", 
+"Kiosk Location #218", "Kiosk Location #219", "Kiosk Location #22", 
+"Kiosk Location #220", "Kiosk Location #221", "Kiosk Location #222", 
+"Kiosk Location #223", "Kiosk Location #224", "Kiosk Location #225", 
+"Kiosk Location #226", "Kiosk Location #227", "Kiosk Location #228", 
+"Kiosk Location #229", "Kiosk Location #23", "Kiosk Location #230", 
+"Kiosk Location #231", "Kiosk Location #232", "Kiosk Location #233", 
+"Kiosk Location #234", "Kiosk Location #235", "Kiosk Location #236", 
+"Kiosk Location #237", "Kiosk Location #238", "Kiosk Location #239", 
+"Kiosk Location #24", "Kiosk Location #240", "Kiosk Location #241", 
+"Kiosk Location #242", "Kiosk Location #243", "Kiosk Location #244", 
+"Kiosk Location #25", "Kiosk Location #26", "Kiosk Location #27", 
+"Kiosk Location #28", "Kiosk Location #29", "Kiosk Location #3", 
+"Kiosk Location #30", "Kiosk Location #31", "Kiosk Location #32", 
+"Kiosk Location #33", "Kiosk Location #34", "Kiosk Location #35", 
+"Kiosk Location #36", "Kiosk Location #37", "Kiosk Location #38", 
+"Kiosk Location #39", "Kiosk Location #4", "Kiosk Location #40", 
+"Kiosk Location #41", "Kiosk Location #42", "Kiosk Location #43", 
+"Kiosk Location #44", "Kiosk Location #45", "Kiosk Location #46", 
+"Kiosk Location #47", "Kiosk Location #48", "Kiosk Location #49", 
+"Kiosk Location #5", "Kiosk Location #50", "Kiosk Location #51", 
+"Kiosk Location #52", "Kiosk Location #53", "Kiosk Location #54", 
+"Kiosk Location #55", "Kiosk Location #56", "Kiosk Location #57", 
+"Kiosk Location #58", "Kiosk Location #59", "Kiosk Location #6", 
+"Kiosk Location #60", "Kiosk Location #61", "Kiosk Location #62", 
+"Kiosk Location #63", "Kiosk Location #64", "Kiosk Location #65", 
+"Kiosk Location #66", "Kiosk Location #67", "Kiosk Location #68", 
+"Kiosk Location #69", "Kiosk Location #7", "Kiosk Location #70", 
+"Kiosk Location #71", "Kiosk Location #72", "Kiosk Location #73", 
+"Kiosk Location #74", "Kiosk Location #75", "Kiosk Location #76", 
+"Kiosk Location #77", "Kiosk Location #78", "Kiosk Location #79", 
+"Kiosk Location #8", "Kiosk Location #80", "Kiosk Location #81", 
+"Kiosk Location #82", "Kiosk Location #83", "Kiosk Location #84", 
+"Kiosk Location #85", "Kiosk Location #86", "Kiosk Location #87", 
+"Kiosk Location #88", "Kiosk Location #89", "Kiosk Location #9", 
+"Kiosk Location #90", "Kiosk Location #91", "Kiosk Location #92", 
+"Kiosk Location #93", "Kiosk Location #94", "Kiosk Location #95", 
+"Kiosk Location #96", "Kiosk Location #97", "Kiosk Location #98", 
+"Kiosk Location #99"), class = "factor")), .Names = c("latitude", 
+"longitude", "popup"), class = "data.frame", row.names = c(NA, 
+-243L))
+
+```
+
+```{r plot-leaflet-tsp, echo=T}
+map <- leaflet() %>%
+  addProviderTiles("Stamen.TonerLite",
+                   options = providerTileOptions(noWrap = TRUE)) %>%
+  addCircleMarkers(data=data, lat = ~latitude, lng = ~longitude, 
+                   radius = 3, popup = ~as.character(paste0(latitude,",",longitude))) %>%
+  addPolylines(data=data, lng = ~longitude, lat = ~latitude, 
+               color = "#A93E36", opacity = .7)
+map
+```
+
+# Using `diagrammeR` to plot graph data
+
+Imagine you have a series of interconnected tasks and processes. If you'd like to
+visualize them using R, then you can use the diagrammeR package
+
+```{r create-diagram-visualization, echo=T}
+graph <-
+  create_graph() %>%
+  set_graph_name("DAG") %>%
+  set_global_graph_attrs("graph", "overlap", "true") %>%
+  set_global_graph_attrs("graph", "fixedsize", "true") %>%
+  set_global_graph_attrs("node", "color", "blue") %>%
+  set_global_graph_attrs("node", "fontname", "Helvetica") %>%
+  add_n_nodes(11) %>%
+  select_nodes_by_id(c(1:4, 8:11)) %>% 
+  set_node_attrs_ws("shape", "box") %>%
+  clear_selection %>%
+  select_nodes_by_id(5:7) %>% 
+  set_node_attrs_ws("shape", "circle") %>%
+  clear_selection %>%
+  add_edges_w_string(
+    "1->5 2->6 3->9 4->7 5->8 5->10 7->11", "green") %>%
+  add_edges_w_string(
+    "1->8 3->6 3->11 3->7 5->9 6->10", "red") %>%
+  select_edges("rel", "green") %>%
+  set_edge_attrs_ws("color", "green") %>%
+  invert_selection %>%
+  set_edge_attrs_ws("color", "red")
+
+render_graph(graph)
+```
+
+# The Pokeman plot
+
+If you love pokemon as much as the person who wrote this ["Visualize 'Em All"](http://jkunst.com/r/pokemon-visualize-em-all/) 
+blog post then you might find their visualization just ridiculous.
+
+```{r loading-pokemon-data, echo=F, eval=T, cache=TRUE}
+path <- function(x) paste0("https://raw.githubusercontent.com/phalt/pokeapi/master/data/v2/csv/", x)
+
+dfpkmn <- read_csv(path("pokemon.csv")) %>%
+  select(-order, -is_default) %>%
+  dplyr::rename(pokemon = identifier) 
+
+# dfpkmn <- read_csv("https://raw.githubusercontent.com/phalt/pokeapi/master/data/v2/csv/pokemon.csv") %>% 
+#   select(-order, -is_default) %>% 
+#   mutate(pokemon = identifier) %>%
+#   select(-identifier)
+
+
+dfstat <- read_csv(path("stats.csv")) %>% 
+  dplyr::rename(stat_id = id) %>%
+  right_join(read_csv(path("pokemon_stats.csv")),
+             by = "stat_id") %>% 
+  dplyr::mutate(identifier = str_replace(identifier, "-", "_")) %>% 
+  select(pokemon_id, identifier, base_stat) %>% 
+  spread(identifier, base_stat) %>% 
+  dplyr::rename(id = pokemon_id)
+
+dftype <- read_csv(path("types.csv")) %>% 
+  dplyr::rename(type_id = id) %>%
+  right_join(read_csv(path("pokemon_types.csv")), by = "type_id") %>% 
+  select(pokemon_id, identifier, slot) %>% 
+  mutate(slot = paste0("type_", slot)) %>% 
+  spread(slot, identifier) %>% 
+  dplyr::rename(id = pokemon_id) 
+
+dfegg <- read_csv(path("egg_groups.csv")) %>% 
+  dplyr::rename(egg_group_id = id) %>% 
+  right_join(read_csv(path("pokemon_egg_groups.csv")), by = "egg_group_id") %>% 
+  group_by(species_id) %>% 
+  dplyr::mutate(ranking = row_number(),
+         ranking = paste0("egg_group_", ranking)) %>% 
+  select(species_id, ranking, identifier) %>% 
+  spread(ranking, identifier) 
+
+dfimg <- "https://github.com/phalt/pokeapi/tree/master/data/Pokemon_XY_Sprites" %>% 
+  read_html() %>% 
+  html_nodes("tr.js-navigation-item > .content > .css-truncate a") %>% 
+  map_df(function(x){
+    url <- x %>% html_attr("href")
+    data_frame(
+      id = str_extract(basename(url), "\\d+"),
+      url_image = basename(url)
+    )
+  }) %>%
+  mutate(id = as.numeric(id))
+
+url_bulbapedia_list <- "http://bulbapedia.bulbagarden.net/wiki/List_of_Pok%C3%A9mon_by_base_stats_(Generation_VI-present)" 
+
+suppressWarnings(id <- url_bulbapedia_list %>% 
+  read_html(encoding = "UTF-8") %>% 
+  html_node("table.sortable") %>% 
+  html_table() %>% 
+  .[[1]] %>% 
+  as.numeric())
+
+url_icon <-  url_bulbapedia_list %>% 
+  read_html() %>%
+  html_nodes("table.sortable img") %>% 
+  html_attr("src")
+
+dficon <- data_frame(id, url_icon) %>% 
+  dplyr::filter(!is.na(id)) %>% 
+  dplyr::distinct(id, .keep_all = TRUE)
+
+dfcolor <- map_df(na.omit(unique(c(dftype$type_1, dftype$type_2))), function(t){
+  # t <- "bug"
+  col <- "http://pokemon-uranium.wikia.com/wiki/Template:%s_color" %>% 
+    sprintf(t) %>%
+    read_html() %>% 
+    html_nodes("span > b") %>% 
+    html_text()
+  data_frame(type = t, color = paste0("#", col))
+})
+
+dfcolorf <- expand.grid(color_1 = dfcolor$color, color_2 = dfcolor$color,
+                        stringsAsFactors = FALSE) %>% 
+  tbl_df() %>% 
+  group_by(color_1, color_2) %>% 
+  do({
+      n = 100;p = 0.25
+      data_frame(color_f = colorRampPalette(c(.$color_1, .$color_2))(n)[round(n*p)])
+    })
+
+# THE join
+df <- dfpkmn %>% 
+  left_join(dftype, by = "id") %>% 
+  left_join(dfstat, by = "id") %>% 
+  left_join(dfcolor %>% dplyr::rename(type_1 = type, color_1 = color), by = "type_1") %>% 
+  left_join(dfcolor %>% dplyr::rename(type_2 = type, color_2 = color), by = "type_2") %>% 
+  left_join(dfcolorf, by =  c("color_1", "color_2")) %>% 
+  left_join(dfegg, by = "species_id") %>% 
+  left_join(dfimg, by = "id") %>% 
+  left_join(dficon, by = "id")
+
+rm(dftype, dfstat, dfcolor, dfcolorf, dfegg, dfimg, dficon)
+rm(id, url_bulbapedia_list, url_icon)
+
+set.seed(13242)
+
+tsne_poke <- df %>% 
+  select(type_1, type_2, weight, height, base_experience,
+         attack, defense, special_attack, special_defense, speed, base_experience,
+         hp, egg_group_1, egg_group_2) %>%
+  map(function(x){
+    ifelse(is.na(x), "NA", x)
+  }) %>% 
+  as.data.frame() %>% 
+  tbl_df() %>% 
+  model.matrix(~., data = .) %>% 
+  as.data.frame() %>% 
+  tbl_df() %>% 
+  .[-1] %>% 
+  tsne(perplexity = 60)
+
+df <- df %>% 
+  dplyr::mutate(x = tsne_poke[, 1],
+         y = tsne_poke[, 2])
+
+dfcenters <- df %>% 
+  group_by(type_1, color_1) %>% 
+  summarise(cx = mean(x),
+            cy = mean(y),
+            sdcx = sd(x),
+            sdcy = sd(y))
+```
+
+```{r plotting-pokemon, echo=T, eval=T}
+
+ds <- df %>% 
+  select(pokemon, type_1, type_2, weight, height,
+         attack, defense, special_attack, special_defense,
+         url_image, url_icon, color = color_1, x, y) %>% 
+  list_parse() %>% 
+  map(function(x){
+    x$marker$symbol <- sprintf("url(%s)", x$url_icon)
+    x$marker$radius <- 2
+    x$url_icon  <- NULL
+    x
+  })
+
+ds2 <- df %>% 
+  select(color = color_1, x, y) %>%
+  mutate(color = hex_to_rgba(color, 0.05)) %>% 
+  list_parse()
+
+urlimage <- "https://raw.githubusercontent.com/phalt/pokeapi/master/data/Pokemon_XY_Sprites/"
+
+tooltip <- c("pokemon", "type_1", "type_2",
+             "weight", "height",
+             "attack",  "defense",
+             "special_attack", "special_defense") %>%
+  map(function(x){
+    tags$tr(
+      tags$th(str_replace_all(str_to_title(x), "_", " ")),
+      tags$td(paste0("{point.", x, "}"))
+    )
+  }) %>% 
+  do.call(tagList, .) %>% 
+  tagList(
+    tags$img(src = paste0(urlimage, "{point.url_image}"),
+             width = "125px", height = "125px")
+  ) %>% 
+  as.character()
+
+hctsne <- highchart() %>% 
+  hc_chart(zoomType = "xy") %>% 
+  hc_xAxis(minRange = diff(range(df$x))/5) %>%
+  hc_yAxis(minRange = diff(range(df$y))/5) %>%
+  hc_add_series(data = ds,
+                type = "scatter",
+                name = "pokemons",
+                states = list(hover = list(halo = list(
+                  size  = 50,
+                  attributes = list(
+                    opacity = 1)
+                )))) %>%
+  hc_add_series(data = ds2, type = "scatter",
+                marker = list(radius = 75, symbol = "circle"),
+                zIndex = -3,  enableMouseTracking = FALSE,
+                linkedTo = ":previous") %>%
+  hc_plotOptions(series = list()) %>%  
+  hc_tooltip(
+    useHTML = TRUE,
+    borderRadius = 0,
+    borderWidth = 5,
+    headerFormat = "<table>",
+    pointFormat = tooltip,
+    footerFormat = "</table>"
+  ) %>% 
+  hc_add_theme(
+    hc_theme_null(
+      chart = list(
+        backgroundColor = "transparent",
+        style = list(
+          fontFamily = "Roboto"
+          )
+        )
+      )
+    )
+
+hctsne
+```

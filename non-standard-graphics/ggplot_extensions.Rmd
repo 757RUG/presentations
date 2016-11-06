@@ -1,0 +1,212 @@
+---
+title: "Nifty Alternative ggplot2 plots"
+date: "`r format(Sys.time(), '%Y %B %d')`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    collapsed: true
+    code_folding: hide
+    fig_width: 10
+    fig_height: 10
+    fig_caption: yes
+    force_captions: yes
+    highlight: pygments
+    number_sections: yes
+    theme: paper
+---
+
+```{r install-packages echo=FALSE, eval=F}
+
+install.packages('ggplot2')
+install.packages('plyr')
+install.packages('dplyr')
+install.packages('tidyr')
+install.packages('scales')
+install.packages('readr')
+install.packages('data.table')
+install.packages('devtools')
+devtools::install_github("hrbrmstr/ggalt")
+devtools::install_github('Ather-Energy/ggTimeSeries')
+
+```
+
+```{r echo=FALSE}
+
+library('ggplot2')
+library('plyr')
+library('dplyr')
+library('tidyr')
+library('scales')
+library('readr')
+library('data.table')
+library('devtools')
+library("hrbrmstr/ggalt")
+library('Ather-Energy/ggTimeSeries')
+
+```
+
+
+# Extending `ggplot2`
+
+`ggplot2` is the popular data visualization package for R developed by Hadley Wickham. The `gg` comes from the grammar of graphics, which I understand it to mean that each plot is broken into its component pieces and built stepwise ("layer by layer" in `ggplot` speak). It's very useful, but many people have contributed packages that extend `ggplot2`
+
+## Time Rivers
+
+Time rivers turn the basic time series plot on its end to emphasize drifts to one end of the response variable scale or the other. There's lots of talk about how America is more politically polarized these days, so a time river could be  a good way to look at any political data that spans the liberal-centrist-conservative scale. A [nice example plot](https://rud.is/b/2016/06/28/making-time-rivers-in-r/) does just that by recreating a recent NYT plot of the estiamted left vs right tendancies of the justices of the SCOTUS. Thanks to Rick Jones for suggesting this one!
+
+This plot uses ggplot and the key component of the code that makes this into a "not-so-standard" graphic is the  `coord_flip()` call that converts swaps the horizontal and vertical axes.
+
+```{r the-leanings-of-the-SCOTUS, message=FALSE, error= FALSE, cache=FALSE}
+
+
+URL <- "http://mqscores.berkeley.edu/media/2014/justices.csv"
+fil <- file.path('./data', basename(URL))
+if (!file.exists(fil)) download.file(URL, fil)
+
+justices <- read_csv(fil)
+
+justices %>%
+  filter(term>=1980,
+         justiceName %in% c("Thomas", "Scalia", "Alito", "Roberts", "Kennedy",
+                            "Breyer", "Kagan", "Ginsburg", "Sotomayor")) %>%
+  dplyr::mutate(col=ifelse(justiceName %in% c("Breyer", "Kagan", "Ginsburg", "Sotomayor"),
+                    "Democrat", "Republican")) -> recent
+
+just_labs <- data_frame(
+  label=c("Thomas", "Scalia", "Alito", "Roberts", "Kennedy", "Breyer", "Kagan", "Ginsburg", "Sotomayor"),
+      x=c(  1990.5,   1985.5,  2004.5,    2004.5,    1986.5,      1994,   2010,     1992.5,      2008.5),
+      y=c(     2.9,      1.4,    1.35,       1.7,       1.0,      -0.1,   -0.9,       -0.1,          -2)
+)
+
+gg <- ggplot(recent)
+gg <- gg + geom_hline(yintercept=0, alpha=0.5)
+gg <- gg + geom_label(data=data.frame(x=c(0.1, -0.1),
+                                      label=c("More →\nconservative", "← More\nliberal"),
+                                      hjust=c(0, 1)), aes(y=x, x=1982, hjust=hjust, label=label),
+                      family="Arial Narrow", fontface="bold", size=4, label.size=0, vjust=1)
+gg <- gg + geom_ribbon(aes(ymin=post_mn-post_sd, ymax=post_mn+post_sd, x=term,
+                             group=justice, fill=col, color=col), size=0.1, alpha=0.3)
+gg <- gg + geom_line(aes(x=term, y=post_med, color=col, group=justice), size=0.1)
+gg <- gg + geom_text(data=just_labs, aes(x=x, y=y, label=label),
+                     family="Arial Narrow", size=2.5)
+gg <- gg + scale_x_reverse(expand=c(0,0), limits=c(2014, 1982),
+                           breaks=c(2014, seq(2010, 1990, -10), 1985, 1982),
+                           labels=c(2014, seq(2010, 1990, -10), "1985\nTERM\n↓", ""))
+gg <- gg + scale_y_continuous(expand=c(0,0), labels=c(-2, "0\nM-Q Score", 2, 4))
+gg <- gg + scale_color_manual(name=NULL, values=c(Democrat="#2166ac", Republican="#b2182b"), guide=FALSE)
+gg <- gg + scale_fill_manual(name="Nominated by a", values=c(Democrat="#2166ac", Republican="#b2182b"))
+gg <- gg + coord_flip()
+gg <- gg + labs(x=NULL, y=NULL,
+                title="Martin-Quinn scores for selected justices, 1985-2014")
+# ,
+#                 subtitle="Ribbon band derived from mean plus one standard deviation. Inner line is the M-Q median.",
+#                 caption="Data source: http://mqscores.berkeley.edu/measures.php")
+# gg <- gg + theme_hrbrmstr_an(grid="XY")
+# gg <- gg + theme(plot.subtitle=element_text(margin=margin(b=15)))
+gg <- gg + theme(legend.title=element_text(face="bold"))
+gg <- gg + theme(legend.position=c(0.05, 0.6))
+gg <- gg + theme(plot.margin=margin(20,20,20,20))
+gg
+
+```
+
+## `ggTimeSeries`
+
+```{r echo= FALSE}
+# creating some data
+set.seed(1)
+dtData <- data.table(
+      DateCol = seq(
+         as.Date("1/01/2014", "%d/%m/%Y"),
+         as.Date("31/12/2015", "%d/%m/%Y"),
+         "days"
+      ),
+      ValueCol = runif(730)
+   )
+dtData[, ValueCol := ValueCol + (strftime(DateCol,"%u") %in% c(6,7) * runif(1) * 0.75), .I]
+dtData[, ValueCol := ValueCol + (abs(as.numeric(strftime(DateCol,"%m")) - 6.5)) * runif(1) * 0.75, .I]
+
+# base plot
+p1 <- ggplot_calendar_heatmap(
+   dtData,
+   'DateCol',
+   'ValueCol'
+)
+
+# adding some formatting
+p1 + 
+   xlab(NULL) + 
+   ylab(NULL) + 
+   scale_fill_continuous(low = 'green', high = 'red') + 
+   facet_wrap(~Year, ncol = 1)
+
+```
+
+##Steam graph
+
+```{r}
+# creating some data
+set.seed(10)
+dfData = data.frame(
+   Time = 1:1000,
+   Signal = abs(
+      c(
+         cumsum(rnorm(1000, 0, 3)), 
+         cumsum(rnorm(1000, 0, 4)), 
+         cumsum(rnorm(1000, 0, 1)),
+         cumsum(rnorm(1000, 0, 2))
+      )
+   ),
+   VariableLabel = c(rep('Class A', 1000), rep('Class B', 1000), rep('Class C', 1000), rep('Class D', 1000))
+)
+
+# base plot
+p1 = ggplot(dfData, aes(x = Time, y = Signal, group = VariableLabel, fill = VariableLabel)) +
+  stat_steamgraph()
+
+
+# adding some formatting
+p1 + 
+   xlab(NULL) + 
+   ylab(NULL) + 
+   coord_fixed( 0.2 * diff(range(dfData$Time)) / diff(range(dfData$Signal)))
+```
+
+
+
+```{r}
+
+health <- read.csv("https://gist.githubusercontent.com/hrbrmstr/0d206070cea01bcb0118/raw/0ea32190a8b2f54b5a9770cb6582007132571c98/zhealth.csv", stringsAsFactors=FALSE, 
+                   header=FALSE, col.names=c("pct", "area_id"))
+
+areas <- read.csv("https://gist.githubusercontent.com/hrbrmstr/0d206070cea01bcb0118/raw/0ea32190a8b2f54b5a9770cb6582007132571c98/zarea_trans.csv", stringsAsFactors=FALSE, header=TRUE)
+
+health %>% 
+  mutate(area_id=trunc(area_id)) %>% 
+  arrange(area_id, pct) %>% 
+  mutate(year=rep(c("2014", "2013"), 26),
+         pct=pct/100) %>% 
+  left_join(areas, "area_id") %>% 
+  mutate(area_name=factor(area_name, levels=unique(area_name))) -> health
+
+setNames(bind_cols(filter(health, year==2014), filter(health, year==2013))[,c(4,1,5)],
+         c("area_name", "pct_2014", "pct_2013")) -> health
+
+
+gg <- ggplot(health, aes(x=pct_2013, xend=pct_2014, y=area_name, group=area_name))
+gg <- gg + geom_dumbbell(color="#a3c4dc", size=0.75, point.colour.l="#0e668b")
+gg <- gg + scale_x_continuous(label=percent)
+gg <- gg + labs(x=NULL, y=NULL)
+gg <- gg + theme_bw()
+gg <- gg + theme(plot.background=element_rect(fill="#f7f7f7"))
+gg <- gg + theme(panel.background=element_rect(fill="#f7f7f7"))
+gg <- gg + theme(panel.grid.minor=element_blank())
+gg <- gg + theme(panel.grid.major.y=element_blank())
+gg <- gg + theme(panel.grid.major.x=element_line())
+gg <- gg + theme(axis.ticks=element_blank())
+gg <- gg + theme(legend.position="top")
+gg <- gg + theme(panel.border=element_blank())
+gg
+
+```

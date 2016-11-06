@@ -1,0 +1,148 @@
+---
+title: "Sparklines in R"
+author: "Patrick Kilduff"
+date: "`r format(Sys.time(), '%Y %B %d')`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    collapsed: true
+    code_folding: hide
+    fig_width: 10
+    fig_height: 10
+    fig_caption: yes
+    force_captions: yes
+    highlight: pygments
+    number_sections: yes
+    theme: paper
+  pdf_document:
+    fig_caption: yes
+    keep_tex: yes
+    number_sections: yes
+---
+
+``` {r global_parms, echo=FALSE, eval=TRUE, warning=FALSE, cache=FALSE}
+
+options(stringsAsFactors=FALSE, scipen=999)
+
+suppressWarnings(suppressPackageStartupMessages(library(knitr)))
+knitr::opts_chunk$set(results='asis', echo=TRUE, eval=TRUE,
+                      cache=FALSE, message = FALSE, warning = FALSE)
+```
+
+```{r install-packages, echo=F, eval=F}
+install.packages("devtools")
+install.packages("quantmod")
+install.packages("dplyr")
+devtools::install_github("Bart6114/sparklines")
+```
+
+```{r get-ready-for-sparklines}
+
+library(quantmod)
+library(dplyr)
+library(sparklines)
+
+# a palette of colorblind friendly colors (first color = grey)
+# http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/
+cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73",
+               "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
+```
+
+
+# Introduction
+
+According to [Wikipedia](https://en.wikipedia.org/wiki/Sparkline): 'The term sparkline was introduced by[2] Edward Tufte for "small, high resolution graphics embedded in a context of words, numbers, images". Tufte describes sparklines as "data-intense, design-simple, word-sized graphics".'
+
+To make sparklines in R we will use the the [sparklines html widget](http://bart6114.github.io/sparklines/) and walk through examples from there. 
+
+Sparkline plotting options are supplied to via the `config` argument. Details on the options that can be supplied via `config` please check out the [jquery sparklines site](/http://omnipotent.net/jquery.sparkline/#s-docs).
+
+First, we need some data. The example uses the `quantmod` package to grab daily stock price data for Google from Yahoo and calculate the daily change in price. The first few data points are returned.
+
+```{r grab-google-data}
+GOOG <-
+  getSymbols("GOOG", src = 'yahoo', from = '2016-03-15', env = NULL) %>%
+  as.data.frame %>%
+  mutate(day_result = GOOG.Close - GOOG.Open)
+
+GOOG_daily_result <-
+  as.vector(GOOG$day_result)
+
+head(GOOG_daily_result)
+```
+
+Because sparklines are small charts, I thought it might be more slick to place them inline with the text. Here's the daily change in Google's price from May 15, 2016 to `r format(Sys.time(), '%Y %B %d')`: 
+
+As line plots: 
+
+1. `r sparkline(GOOG_daily_result, "line", width = 200)` 
+
+2. `r sparkline(GOOG_daily_result, "line", list(fillColor="white"), width = 200)`
+
+As a bar plot:
+
+`r sparkline(GOOG_daily_result, "bar")`
+
+As a tristate (+: green, 0: grey, -: red) plot:
+
+`r sparkline(GOOG_daily_result, "tristate")`
+
+What do you think?
+
+
+You can also make a 'spark'pie chart: `r sparkline(c(0.4, 0.25, 0.35), "pie", width = 20)` 
+
+# My baseball example
+
+## Overview
+
+So I'm a St. Louis Cardinals fan and am not use to the Chicago Cubs being so much better than my team. Let's use some `sparkline` plots to, painfully, look at how much better the Cubs are this year. Cardinals fans have been spoiled with a long run of successful seasons. I've got nothing against the Cubs building a winner, but it's particulary tough because the architect behind their new found success is Theo Epstein who "built" the Red Sox teams that broke the curse (and won two World Series against the Cardinals). Data manually scraped from [baseballreference.com](baseballreference.com).
+
+The first thing to do is to look at their records. I'll use a pie chart and a bar chart to do that. 
+
+Wins (Blue) and Losses (Red): pie chart - `r sparkline(values = c(0.75, 0.25), chart_type = "pie", config = list(fillColor = cbPalette[2:3]), width = 20)` and a tristate chart - `r sparkline(values = c(5, -5, 5, -5, 5, -5), chart_type = "tristate", width = 20)`
+
+```{r import-win-loss-data, echo=FALSE}
+
+cards <- read.csv("./data/stl_2016_WL.csv")
+
+cards$net <- with(cards, W-L)
+
+cubs <- read.csv("./data/chc_2016_WL.csv")
+
+cubs$net <- with(cubs, W-L)
+
+```
+
+
+So before Saturday's game the Cubbies were a comfortable `r 73-41` games over .500 (`r sparkline(values = c(73, 41), chart_type = "pie", config = list(fillColor = cbPalette[2:3]), width = 20)`) and the second place Cardinals were `r 60-56` games above .500 (`r sparkline(values = c(60, 56), chart_type = "pie", config = list(fillColor = cbPalette[2:3]), width = 20)`)and `r ((73-41)-(60-56))/2` games out of first place in the NL Central.
+
+Looking at the season game-by-game we can take a quick look at the  dominance of the Cubbies and the mediocracy of the Cardinals:
+
+## Bar plots
+
+Cubbies: 
+
+`r sparkline(values = cubs$net , "bar", height = 50)`
+
+
+Birds-on-the-bat: 
+
+`r sparkline(values = cards$net , "bar", height = 50)`
+
+
+## Tristate plots
+
+Cubbies: 
+
+`r sparkline(values = cubs$net , chart_type = "tristate", height = 30)`
+
+Birds-on-the-bat: 
+
+`r sparkline(values = cards$net , chart_type = "tristate", height = 30)`
+
+## Summary
+
+The Cubs recent winning streak and a fast start to the season has, thus far, proven too much for the rest of the NL Central, including my beloved Redbirds. 

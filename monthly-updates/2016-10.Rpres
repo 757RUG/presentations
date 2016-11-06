@@ -1,0 +1,67 @@
+<div class="logo">
+  <a href="http://www.meetup.com/757-R-Users-Group/" target="_blank">
+  <img src="../757-rug-logo.png" alt="logo">
+  </a>
+</div>
+
+<div class="copyright">
+757 R User Group: <a href="http://www.meetup.com/757-R-Users-Group/" target="_blank">http://www.meetup.com/757-R-Users-Group/</a>
+</div>
+
+757 R Users Group
+========================================
+author: Regular Meeting
+date: `r format(as.Date('2016-10-18'), format="%B %d, %Y")`
+css: ../757-rug-presentations.css
+
+WiFi
+========================================
+
+<br>
+<span style="font-size:150%;color:black;">Getting on Library WiFi: </span><br>
+<br>
+<span style="font-size:140%;"><u>Network Key</u>: nplwireless (first time only)</span><br><br>
+<span style="font-size:140%;"><u>Username</u>: nplguest</span><br><br>
+<span style="font-size:140%;"><u>Password</u>: nplguest</span><br><br>
+<br>
+
+Upcoming Norfolk Data Science Meeting
+========================================
+
+<br>
+<img src="./img/github.png" style="margin: auto;display: block;"/>
+<br>
+<ul>
+  <li>Presentation: Outline and Practice with Git and GitHub</li>
+  <li>Food & Sponsors: Dominion Enterprises</li>
+  <li>When: Tuesday, November 1st, 2016 @ 6:30 PM</li>
+  <li>Where: Slover Library 105 Board Room</li>
+</ul>
+
+Next 757 RUG Meeting
+========================================
+
+<div class="footer">
+&nbsp;&nbsp;Image from: <a href="http://spf13.com/post/soap-vs-rest">http://spf13.com/post/soap-vs-rest</a>
+</div>
+<br>
+<div class="midcenter" style="margin-left:-380px; margin-top:-255px; width:103%;">
+  <ul>
+    <li>Presentation: Working with APIs from R</li>
+    <li>When: Tuesday, November 15th, 2016 @ 6:30 PM</li>
+    <li>Where: Slover Library 105 Board Room</li>
+  </ul>
+  <img style="width:50%;" src="http://downloads.eviware.s3.amazonaws.com/web_site_images/soapui/web_images/Dojo/REST_vs_Soap.png" alt="soap-v-rest-diagram">
+</div>
+
+Dominion Enterprises Open Data Hackathon
+========================================
+
+<br>
+<ul>
+  <li>What: Teams of 4 or 5 compete to do something cool with data.</li>
+  <li>Focus: Community Data - United Way of Southampton is providing data</li>
+  <li>When: December 2nd and 3rd, 2016 (Friday & Saturday)</li>
+  <li>Where: 150 Granby St, Norfolk (downtown, DE building)</li>
+</ul>
+
