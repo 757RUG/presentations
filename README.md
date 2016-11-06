@@ -15,5 +15,7 @@ Go to the homepage and click away! https://757rug.github.io/presentations/
 2. Make a branch for your presentation from the template branch
 	1. `git checkout -b my_presentation template`
 	2. `git push -u origin my_presentation` 
-3. Work on your presentation
-4. Submit a pull request to the `master` branch
+3. Change the name of the "template" folder to the name of your presentation
+    1. Use only lowercase letters, numbers and hypens in your folder name
+4. Work on your presentation
+5. Submit a pull request to the `master` branch
