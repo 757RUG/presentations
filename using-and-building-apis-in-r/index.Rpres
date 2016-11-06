@@ -1,7 +1,18 @@
+<div class="logo">
+  <a href="http://www.meetup.com/757-R-Users-Group/" target="_blank">
+  <img src="../757-rug-logo.png" alt="logo">
+  </a>
+</div>
+
+<div class="copyright">
+757 R User Group: <a href="http://www.meetup.com/757-R-Users-Group/" target="_blank">http://www.meetup.com/757-R-Users-Group/</a>
+</div>
+
 Using and Making APIs in R
 ========================================
 author: Steve Mortimer
-css: css-presentations.css
+date: `r gsub(" 0", " ", format(as.Date('2016-03-15'), format="%B %d, %Y"))`
+css: ../757-rug-presentations.css
 
 ```{r setup, include=FALSE}
   library(knitr)
@@ -59,7 +70,7 @@ respective implementations<sup>1</sup></blockquote>
 
 Diagramming SOAP vs. REST Services
 ====================================================
-<div class="midcenter" style="margin-left:-410px; margin-top:-255px; width:103%;">g
+<div class="midcenter" style="margin-left:-410px; margin-top:-255px; width:103%;">
   <img style="width:100%;" src="http://downloads.eviware.s3.amazonaws.com/web_site_images/soapui/web_images/Dojo/REST_vs_Soap.png" alt="soap-v-rest-diagram">
 </div><br>
 <div class="footer">
@@ -312,18 +323,41 @@ Additional References
 ====================================================
 type: subsection
 
-* <a href="http://hilaryparker.com/2014/04/29/writing-an-r-package-from-scratch/">Building an R Package</a>
-
-* <a href="https://www.opencpu.org">OpenCPU</a>
-  * <a href="https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=2&cad=rja&uact=8&ved=0ahUKEwiT47r-vrzKAhVG2R4KHT-WAroQjBAIJDAB&url=https%3A%2F%2Fwww.opencpu.org%2Fapps.html&usg=AFQjCNFieqdE9a1tvel0wBtDttQ_LdsLhw&sig2=pzJk9q7buvgj8X12yIa1aw">Example Apps</a>
-  * <a href="https://www.opencpu.org/api.html#api-ci">Deploying on Public Server</a>
-  * <a href="https://www.opencpu.org/api.html#api-json">Formatting JSON calls to the API</a>
-  
-* Deploying OpenCPU on Personal Server
-  * <a href="https://www.virtualbox.org/wiki/Downloads">Downloading Virtualbox</a>
-  * <a href="https://www.vagrantup.com/downloads.html">Vagrant Download</a>
-  * <a href="https://github.com/mitchellh/vagrant-aws">Vagrant AWS Plugin</a>
-  * <a href="https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=5&cad=rja&uact=8&ved=0ahUKEwiT47r-vrzKAhVG2R4KHT-WAroQjBAIJjAE&url=https%3A%2F%2Fwww.opencpu.org%2Fdownload.html&usg=AFQjCNE6_UOD_BmO_pg48G-U7Armbo5MUw&sig2=oTt73nHH_K8lr1smIaeSsA">Instructions to Download and install</a>
-  * <a href="http://jeroenooms.github.io/opencpu-manual/opencpu-server.pdf">Server Manual (helpful for self-hosting)</a>
-
-
+<ul>
+  <li>
+    <a href="http://hilaryparker.com/2014/04/29/writing-an-r-package-from-scratch/">Building an R Package</a>
+  </li>
+  <li>
+    <a href="https://www.opencpu.org">OpenCPU</a>
+    <ul style="padding-left:40px;">
+      <li>
+        <a href="https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=2&cad=rja&uact=8&ved=0ahUKEwiT47r-vrzKAhVG2R4KHT-WAroQjBAIJDAB&url=https%3A%2F%2Fwww.opencpu.org%2Fapps.html&usg=AFQjCNFieqdE9a1tvel0wBtDttQ_LdsLhw&sig2=pzJk9q7buvgj8X12yIa1aw">Example Apps</a>
+      </li>
+      <li>
+        <a href="https://www.opencpu.org/api.html#api-ci">Deploying on Public Server</a>
+      </li>
+      <li>
+        <a href="https://www.opencpu.org/api.html#api-json">Formatting JSON calls to the API</a>
+      </li>
+    </ul>
+  </li>
+  <li>
+    Deploying OpenCPU on Personal Server
+    <ul style="padding-left:40px;">
+      <li>
+        <a href="https://www.virtualbox.org/wiki/Downloads">Downloading Virtualbox</a>
+      </li>
+      <li>
+        <a href="https://www.vagrantup.com/downloads.html">Vagrant Download</a>
+      </li>
+      <li>
+        <a href="https://github.com/mitchellh/vagrant-aws">Vagrant AWS Plugin</a>
+      </li>
+      <li>
+        <a href="https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=5&cad=rja&uact=8&ved=0ahUKEwiT47r-vrzKAhVG2R4KHT-WAroQjBAIJjAE&url=https%3A%2F%2Fwww.opencpu.org%2Fdownload.html&usg=AFQjCNE6_UOD_BmO_pg48G-U7Armbo5MUw&sig2=oTt73nHH_K8lr1smIaeSsA">Instructions to Download and install</a>
+      </li>
+      <li>
+        <a href="http://jeroenooms.github.io/opencpu-manual/opencpu-server.pdf">Server Manual (helpful for self-hosting)</a>
+      </li>
+    </ul>
+  </li>

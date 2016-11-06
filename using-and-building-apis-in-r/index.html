@@ -559,13 +559,70 @@ body {
   font-family: "News Cycle", Impact, sans-serif;
 }
 
+/* manages the logo */
+div.logo {
+	padding-top: 10px;
+	padding-bottom: 25px;
+}
 
-/* makes title "section" slides white as well
+.logo img {
+  padding-left: 10px;
+	padding-right: 5px;
+	position: fixed;
+	left: 0px;
+	z-index: 100;
+}
+
+.logo p {
+  font: 16px/20px Arial, sans-serif;
+  color: #0054A0 !important;
+  padding-left: 5px;
+	position: fixed;
+	left: 70px;
+	z-index: 100;
+}
+
+/* inserts copyright */
+.copyright {
+  color: #555555;
+  text-align: left;
+  position: absolute;
+  left: 0px;
+  bottom: 0px;
+  padding: 10px;
+  z-index: 100;
+	font-size: 150%;
+}
+
+
+/* makes title slide white as well */
 .reveal .state-background {
   background: #FFFFFF !important;
 }
- */
- 
+
+/* pushes content further to top */
+.reveal .slides > section {
+  top: -60% !important;
+}
+
+/* removes shadow from the title and makes slightly smaller*/
+.reveal h1 {
+  color: #555555 !important;
+  text-shadow: none !important;
+  font-size: 1.6em !important;
+}
+
+/* makes all text a consistent color */
+.reveal h2, h3 ,h4 ,h5, h6, p {
+  color: #555555 !important;
+}
+
+/* stops title hyphenating if too long */
+.reveal h1, .reveal h2, .reveal h3 {
+  word-wrap: normal;
+  -moz-hyphens: none;
+}
+
 .reveal pre {
   margin-top: 30px;
 }
@@ -576,54 +633,73 @@ body {
   word-break: break-all;
 }
 
-/* leave R code blocks at 1em */
+/* force R code blocks at .9em */
 .reveal code.r {
-  font-size: 1em;
+  font-size: .9em;
 }
 
-/* changes header text colors
-.reveal h1 {
-  color: #555555 !important;
-  text-shadow: none !important;
+.reveal sup {
+  vertical-align: super;
+  font-size: 60% !important;
 }
 
-.reveal h2, h3 ,h4 ,h5, h6, p {
-  color: #555555 !important;
+.code-div {
+  margin-top: 10px !important;
+  max-width: 95% !important;
+  border: 1px solid #ccc !important;
+  padding: 10px !important;
+  margin-bottom: 1em !important;
+  display: block !important;
+  position: relative !important;
+  width: 90% !important;
+  margin: 15px auto !important;
+  text-align: left !important;
+  font-family: monospace !important;
+  font-size: .7em !important;
+  line-height: 1.2em !important;
+  word-wrap: break-word !important;
+  box-shadow: 0 0 6px rgba(0,0,0,.3) !important;
 }
-*/
 
-.reveal .slides section .slideContent h3 {
-  font-weight: normal;
-  font-size: 1.55em;
+.longer-list li{
+ font-size:75% !important;
 }
 
-/* stops title hyphenating if too long */
-.reveal h1, .reveal h2, .reveal h3 {
-  word-wrap: normal;
-  -moz-hyphens: none;
-}
-
-.reveal h1 {
-  font-size: 2.25em !important;
-  margin-top: 200px !important;
+.reveal ol, .reveal ul {
+  margin: 0 !important;
 }
 
 /* default placement of images is center */
 .midcenter {
-    position: fixed;
-    top: 50%;
-    left: 50%;
+  position: fixed;
+  top: 50%;
+  left: 50%;
 }
 
-.ignore-links a:not(.image) {
-  text-decoration: none !important;
-  color: black;
-}
-
-.ignore-links a:not(.image):hover {
-  text-decoration: none !important;
-  color: black;
-}
+.photobanner p {
+  text-align: left;
+  display: block;
+  padding-bottom: 20px;
+ }
+ 
+.photobanner img {
+  float: left;
+  height: 100px;
+  width: 100px;
+ }
+ 
+.photobanner span {
+  font-size: 25px;
+  padding-left: 10px;
+  vertical-align: middle;
+ }
+ 
+.photobanner .item2 {
+  font-size: 25px;
+  padding-left: 10px;
+  vertical-align: middle;
+  align: left;
+  }
 
 /* inserts footer */
 .footer {
@@ -634,7 +710,7 @@ body {
   bottom: 0px !important;
   padding: 10px !important;
   z-index: 100 !important;
-	font-size: 60% !important;
+	font-size: .5em !important;
 }
 
 .footer2 {
@@ -653,24 +729,34 @@ body {
 blockquote {
   display: block !important;
   margin-top: 10px !important;
-  margin-bottom: 10px !important;
-  margin-left: 40px !important;
-  margin-right: 40px !important;
-  background-color: #F0F8FF !important;
-  border-radius: 15px !important;
-  padding: 15px !important;
-  border-color: cadetblue !important;
+  margin-bottom: 5px !important;
+  margin-left: 35px !important;
+  margin-right: 35px !important;
+  background-color: #cadef6 !important;
+  border-radius: 10px !important;
+  padding: 8px !important;
+  border-color: #1f63b6 !important;
   border-width: 1px !important;
   border-style: solid !important;
 }
 
-.reveal p, .reveal table {
-    margin-bottom: 10px;
+.wrapper {
+  display: table;
 }
 
-.reveal sup {
-  vertical-align: super;
-  font-size: 60% !important;
+.wrapper ul {
+  display: table-cell;
+  vertical-align: top;
+}
+
+.wrapper img {
+  margin: 100px !important;
+  display: table-cell;
+  vertical-align: top;
+}
+
+.extra-li-top-pad li {
+  padding-top: 20px !important;
 }
 
   </style>
@@ -885,7 +971,7 @@ hljs.initHighlightingOnLoad();
    
   
 
-
+<div class="logo">  <a href="http://www.meetup.com/757-R-Users-Group/" target="_blank">  <img src="data:image/png;base64,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" alt="logo">  </a></div><div class="copyright">757 R User Group: <a href="http://www.meetup.com/757-R-Users-Group/" target="_blank">http://www.meetup.com/757-R-Users-Group/</a></div>
 
 
 
@@ -896,7 +982,7 @@ hljs.initHighlightingOnLoad();
   <div class="slides">
 
 <section data-state="section" data-transition="linear" data-transition-speed="default">
-<h1>Using and Making APIs in R</h1><p>Steve Mortimer</p>
+<h1>Using and Making APIs in R</h1><p>Steve Mortimer<br/>March 15, 2016</p>
 
 <div class="slideContent" >
 
@@ -1072,10 +1158,10 @@ resp
 </code></pre>
 
 <pre><code>Response [http://www.omdbapi.com/?t=The+Godfather&amp;plot=short&amp;r=xml]
-  Date: 2016-01-22 05:41
+  Date: 2016-11-06 19:42
   Status: 200
   Content-Type: text/xml; charset=utf-8
-  Size: 796 B
+  Size: 843 B
 </code></pre>
 
 <pre><code class="r">parsed_xml &lt;- read_xml(content(resp, as=&quot;raw&quot;))
@@ -1083,7 +1169,7 @@ parsed_xml
 </code></pre>
 
 <pre><code>{xml_document}
-&lt;root&gt;
+&lt;root response=&quot;True&quot;&gt;
 [1] &lt;movie title=&quot;The Godfather&quot; year=&quot;1972&quot; rated=&quot;R&quot; released=&quot;24 Mar  ...
 </code></pre>
 
@@ -1100,7 +1186,7 @@ xmlAttrs(xmlChildren(formatted_xml)$root)
 </code></pre>
 
 <pre><code>totalResults     response 
-        &quot;52&quot;       &quot;True&quot; 
+        &quot;61&quot;       &quot;True&quot; 
 </code></pre>
 
 <pre><code class="r"># find all &quot;result&quot; elements
@@ -1109,10 +1195,10 @@ head(parsed_movie_elements, 2)
 </code></pre>
 
 <pre><code>[[1]]
-&lt;result title=&quot;The Godfather&quot; year=&quot;1972&quot; imdbID=&quot;tt0068646&quot; type=&quot;movie&quot; poster=&quot;http://ia.media-imdb.com/images/M/MV5BMjEyMjcyNDI4MF5BMl5BanBnXkFtZTcwMDA5Mzg3OA@@._V1_SX300.jpg&quot;/&gt; 
+&lt;result title=&quot;The Godfather&quot; year=&quot;1972&quot; imdbID=&quot;tt0068646&quot; type=&quot;movie&quot; poster=&quot;https://images-na.ssl-images-amazon.com/images/M/MV5BNTUxOTdjMDMtMWY1MC00MjkxLTgxYTMtYTM1MjU5ZTJlNTZjXkEyXkFqcGdeQXVyNTA4NzY1MzY@._V1_SX300.jpg&quot;/&gt; 
 
 [[2]]
-&lt;result title=&quot;The Godfather: Part II&quot; year=&quot;1974&quot; imdbID=&quot;tt0071562&quot; type=&quot;movie&quot; poster=&quot;http://ia.media-imdb.com/images/M/MV5BNDc2NTM3MzU1Nl5BMl5BanBnXkFtZTcwMTA5Mzg3OA@@._V1_SX300.jpg&quot;/&gt; 
+&lt;result title=&quot;The Godfather: Part II&quot; year=&quot;1974&quot; imdbID=&quot;tt0071562&quot; type=&quot;movie&quot; poster=&quot;https://images-na.ssl-images-amazon.com/images/M/MV5BOTE1MTBiYzYtMDI1OC00ZTUxLTg0ZWQtZjdjMzA0OTM1NGMwXkEyXkFqcGdeQXVyMjUzOTY1NTc@._V1_SX300.jpg&quot;/&gt; 
 </code></pre>
 
 </div>
@@ -1133,8 +1219,8 @@ head(xml_to_df[c(&#39;title&#39;, &#39;year&#39;, &#39;imdbID&#39;, &#39;type&#3
 2                The Godfather: Part II 1974 tt0071562  movie
 3               The Godfather: Part III 1990 tt0099674  movie
 4      The Godfather Trilogy: 1901-1980 1992 tt0150742  movie
-5                         The Godfather 2006 tt0442674   game
-6 The Godfather: A Novel for Television 1977 tt0809488 series
+5 The Godfather: A Novel for Television 1977 tt0809488 series
+6                         The Godfather 2006 tt0442674   game
 </code></pre>
 
 </div>
@@ -1148,7 +1234,7 @@ data &lt;- getURL(&#39;http://www.omdbapi.com/?s=The+Godfather&amp;r=json&#39;)
 substring(data,1,250)
 </code></pre>
 
-<pre><code>[1] &quot;{\&quot;Search\&quot;:[{\&quot;Title\&quot;:\&quot;The Godfather\&quot;,\&quot;Year\&quot;:\&quot;1972\&quot;,\&quot;imdbID\&quot;:\&quot;tt0068646\&quot;,\&quot;Type\&quot;:\&quot;movie\&quot;,\&quot;Poster\&quot;:\&quot;http://ia.media-imdb.com/images/M/MV5BMjEyMjcyNDI4MF5BMl5BanBnXkFtZTcwMDA5Mzg3OA@@._V1_SX300.jpg\&quot;},{\&quot;Title\&quot;:\&quot;The Godfather: Part II\&quot;,\&quot;Year\&quot;:\&quot;1974\&quot;,\&quot;imdbID&quot;
+<pre><code>[1] &quot;{\&quot;Search\&quot;:[{\&quot;Title\&quot;:\&quot;The Godfather\&quot;,\&quot;Year\&quot;:\&quot;1972\&quot;,\&quot;imdbID\&quot;:\&quot;tt0068646\&quot;,\&quot;Type\&quot;:\&quot;movie\&quot;,\&quot;Poster\&quot;:\&quot;https://images-na.ssl-images-amazon.com/images/M/MV5BNTUxOTdjMDMtMWY1MC00MjkxLTgxYTMtYTM1MjU5ZTJlNTZjXkEyXkFqcGdeQXVyNTA4NzY1MzY@._V1_SX300.jpg\&quot;},{\&quot;Title\&quot;&quot;
 </code></pre>
 
 <pre><code class="r">json_to_df &lt;- ldply(rjson::fromJSON(data)$Search, function(x) as.data.frame(x))
@@ -1160,8 +1246,8 @@ head(json_to_df[c(&#39;Title&#39;, &#39;Year&#39;, &#39;imdbID&#39;, &#39;Type&#
 2                The Godfather: Part II 1974 tt0071562  movie
 3               The Godfather: Part III 1990 tt0099674  movie
 4      The Godfather Trilogy: 1901-1980 1992 tt0150742  movie
-5                         The Godfather 2006 tt0442674   game
-6 The Godfather: A Novel for Television 1977 tt0809488 series
+5 The Godfather: A Novel for Television 1977 tt0809488 series
+6                         The Godfather 2006 tt0442674   game
 </code></pre>
 
 </div>
@@ -1351,24 +1437,44 @@ rjson::fromJSON(res)
 <h3>Additional References</h3>
 <div class="slideContent" >
 <ul>
-<li><p><a href="http://hilaryparker.com/2014/04/29/writing-an-r-package-from-scratch/">Building an R Package</a></p></li>
-<li><p><a href="https://www.opencpu.org">OpenCPU</a></p>
+  <li>
+    <a href="http://hilaryparker.com/2014/04/29/writing-an-r-package-from-scratch/">Building an R Package</a>
+  </li>
+  <li>
+    <a href="https://www.opencpu.org">OpenCPU</a>
+    <ul style="padding-left:40px;">
+      <li>
+        <a href="https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=2&cad=rja&uact=8&ved=0ahUKEwiT47r-vrzKAhVG2R4KHT-WAroQjBAIJDAB&url=https%3A%2F%2Fwww.opencpu.org%2Fapps.html&usg=AFQjCNFieqdE9a1tvel0wBtDttQ_LdsLhw&sig2=pzJk9q7buvgj8X12yIa1aw">Example Apps</a>
+      </li>
+      <li>
+        <a href="https://www.opencpu.org/api.html#api-ci">Deploying on Public Server</a>
+      </li>
+      <li>
+        <a href="https://www.opencpu.org/api.html#api-json">Formatting JSON calls to the API</a>
+      </li>
+    </ul>
 
-<ul>
-<li><a href="https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=2&cad=rja&uact=8&ved=0ahUKEwiT47r-vrzKAhVG2R4KHT-WAroQjBAIJDAB&url=https%3A%2F%2Fwww.opencpu.org%2Fapps.html&usg=AFQjCNFieqdE9a1tvel0wBtDttQ_LdsLhw&sig2=pzJk9q7buvgj8X12yIa1aw">Example Apps</a></li>
-<li><a href="https://www.opencpu.org/api.html#api-ci">Deploying on Public Server</a></li>
-<li><a href="https://www.opencpu.org/api.html#api-json">Formatting JSON calls to the API</a></li>
-</ul></li>
-<li><p>Deploying OpenCPU on Personal Server</p>
-
-<ul>
-<li><a href="https://www.virtualbox.org/wiki/Downloads">Downloading Virtualbox</a></li>
-<li><a href="https://www.vagrantup.com/downloads.html">Vagrant Download</a></li>
-<li><a href="https://github.com/mitchellh/vagrant-aws">Vagrant AWS Plugin</a></li>
-<li><a href="https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=5&cad=rja&uact=8&ved=0ahUKEwiT47r-vrzKAhVG2R4KHT-WAroQjBAIJjAE&url=https%3A%2F%2Fwww.opencpu.org%2Fdownload.html&usg=AFQjCNE6_UOD_BmO_pg48G-U7Armbo5MUw&sig2=oTt73nHH_K8lr1smIaeSsA">Instructions to Download and install</a></li>
-<li><a href="http://jeroenooms.github.io/opencpu-manual/opencpu-server.pdf">Server Manual (helpful for self-hosting)</a></li>
-</ul></li>
-</ul>
+<p></li>
+  <li>
+    Deploying OpenCPU on Personal Server
+    <ul style="padding-left:40px;">
+      <li>
+        <a href="https://www.virtualbox.org/wiki/Downloads">Downloading Virtualbox</a>
+      </li>
+      <li>
+        <a href="https://www.vagrantup.com/downloads.html">Vagrant Download</a>
+      </li>
+      <li>
+        <a href="https://github.com/mitchellh/vagrant-aws">Vagrant AWS Plugin</a>
+      </li>
+      <li>
+        <a href="https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=5&cad=rja&uact=8&ved=0ahUKEwiT47r-vrzKAhVG2R4KHT-WAroQjBAIJjAE&url=https%3A%2F%2Fwww.opencpu.org%2Fdownload.html&usg=AFQjCNE6_UOD_BmO_pg48G-U7Armbo5MUw&sig2=oTt73nHH_K8lr1smIaeSsA">Instructions to Download and install</a>
+      </li>
+      <li>
+        <a href="http://jeroenooms.github.io/opencpu-manual/opencpu-server.pdf">Server Manual (helpful for self-hosting)</a>
+      </li>
+    </ul>
+  </li></p>
 
 </div>
 
