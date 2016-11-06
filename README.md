@@ -5,6 +5,10 @@
 
 A repository of all presentations made at regular 757 R Users Group meetings
 
+####Viewing the Presentations
+
+Go to the homepage and click away! https://757rug.github.io/presentations/
+
 ####Contributing Your Presentation
 
 1. Clone this repository (`git clone git@github.com:757RUG/presentations.git`)
