@@ -1,6 +1,6 @@
 <div class="logo">
   <a href="http://www.meetup.com/757-R-Users-Group/" target="_blank">
-  <img src="../757-rug-logo.png" alt="logo">
+  <img src="../757-rug-logo.png" alt="757-rug-logo">
   </a>
 </div>
 
@@ -11,7 +11,7 @@
 Land a Job Writing R Code
 ========================================
 author: Steve Mortimer
-date: `r format(as.Date('2016-10-18'), format="%B %d, %Y")`
+date: `r gsub(" 0", " ", format(as.Date('2016-10-18'), format="%B %d, %Y"))`
 css: ../757-rug-presentations.css
 
 ```{r setup, include=FALSE}
