@@ -8,6 +8,26 @@
 757 R User Group: <a href="http://www.meetup.com/757-R-Users-Group/" target="_blank">http://www.meetup.com/757-R-Users-Group/</a>
 </div>
 
+<a href="https://github.com/757RUG/presentations/land-a-job-writing-r-code"><img style="z-index: 1000; margin: 0px !important; max-height: 300px !important; position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
+
+<meta name="description" content="A guide for individuals relatively new to R and wanting to find a job writing code in the R language" />
+
+<meta name="twitter:card" content="summary">
+<meta name="twitter:site" content="@RUG757">
+<meta name="twitter:title" content="Land a Job Writing R Code">
+<meta name="twitter:description" content="A guide for individuals relatively new to R and wanting to find a job writing code in the R language">
+<meta name="twitter:creator" content="@RUG757">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/757rug/meetup-link/master/757-rug-logo.png">
+
+<!-- Open Graph data -->
+<meta property="og:title" content="Land a Job Writing R Code" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://757RUG.github.io/presentations/land-a-job-writing-r-code" />
+<meta property="og:image" content="https://raw.githubusercontent.com/757rug/presentations/master/land-a-job-writing-r-code/img/rmarkdown-tshirt.jpg" />
+<meta property="og:description" content="A guide for individuals relatively new to R and wanting to find a job writing code in the R language" />
+<meta property="og:site_name" content="757 R Users Group" />
+
+
 Land a Job Writing R Code
 ========================================
 author: Steve Mortimer
