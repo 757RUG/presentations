@@ -1,11 +1,45 @@
+
+<!--- SET THE URL OF YOUR PRESENTATION. ---> 
+<!--- THIS WILL LOOK LIKE https://757rug.github.io/YOUR-PRESENTATION-NAME-HERE --->
+<meta property="og:url" content="https://757RUG.github.io/presentations/monthly-updates/2016-11.html" />
+
+<!--- MAKE THE TITLE THE SAME FOR THESE 2 METATAGS --->
+<meta property="og:title" content="Monthly Update November 2016" />
+<meta name="twitter:title" content="Monthly Update November 2016" />
+
+<!--- MAKE THE COVER IMAGE THE SAME FOR THESE 2 METATAGS --->
+<meta name="twitter:image" content="https://raw.githubusercontent.com/757rug/meetup-link/master/757-rug-logo.png" />
+<meta property="og:image" content="https://raw.githubusercontent.com/757rug/meetup-link/master/757-rug-logo.png" />
+
+<!--- MAKE THE DESCRIPTION THE SAME FOR ALL THESE METATAGS --->
+<meta name="description" content="Monthly Update November 2016" />
+<meta name="twitter:description" content="Monthly Update November 2016" />
+<meta property="og:description" content="Monthly Update November 2016" />
+
+<!--- DONT TOUCH THESE METATAGS --->
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:site" content="@RUG757" />
+<meta name="twitter:creator" content="@RUG757" />
+<meta property="og:site_name" content="757 R Users Group" />
+
+<!--- CHANGE TO THE FILE PATH OF YOUR PRESENTATION IN THE REPOSITORY --->
+<!--- THIS WILL LOOK LIKE https://github.com/757RUG/presentations/tree/master/YOUR-PRESENTATION-NAME-HERE --->
+<a href="https://github.com/757RUG/presentations/tree/master/monthly-updates"><img style="z-index: 1000; margin: 0px !important; max-height: 300px !important; position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
+
+<!--- DONT TOUCH --->
 <div class="logo">
   <a href="http://www.meetup.com/757-R-Users-Group/" target="_blank">
-  <img src="../757-rug-logo.png" alt="logo">
+    <img src="../757-rug-logo.png" alt="757-rug-logo" />
   </a>
 </div>
 
+<!--- DONT TOUCH --->
 <div class="copyright">
-757 R User Group: <a href="http://www.meetup.com/757-R-Users-Group/" target="_blank">http://www.meetup.com/757-R-Users-Group/</a>
+  757 R User Group: 
+  <a href="http://www.meetup.com/757-R-Users-Group/" target="_blank">
+    http://www.meetup.com/757-R-Users-Group/
+  </a>
 </div>
 
 757 R Users Group
