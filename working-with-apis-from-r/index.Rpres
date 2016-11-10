@@ -8,8 +8,8 @@
 <meta name="twitter:title" content="Working with APIs from R" />
 
 <!--- MAKE THE COVER IMAGE THE SAME FOR THESE 2 METATAGS --->
-<meta name="twitter:image" content="https://raw.githubusercontent.com/757rug/meetup-link/master/757-rug-logo.png" />
-<meta property="og:image" content="https://raw.githubusercontent.com/757rug/meetup-link/master/757-rug-logo.png" />
+<meta name="twitter:image" content="https://raw.githubusercontent.com/757rug/presentations/master/working-with-apis-from-r/i-heart-apis.jpg" />
+<meta property="og:image" content="https://raw.githubusercontent.com/757rug/presentations/master/working-with-apis-from-r/i-heart-apis.jpg" />
 
 <!--- MAKE THE DESCRIPTION THE SAME FOR ALL THESE METATAGS --->
 <meta name="description" content="An overview on interacting with APIs from R (including a deeper dive on authentication)" />
