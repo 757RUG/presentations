@@ -49,6 +49,7 @@ div.logo {
   color: #555555 !important;
   text-shadow: none !important;
   font-size: 1.6em !important;
+  margin-top: 100px !important;
 }
 
 /* makes all text a consistent color */
@@ -74,7 +75,7 @@ div.logo {
 
 /* force R code blocks at .9em */
 .reveal code.r {
-  font-size: .9em;
+  font-size: .95em;
 }
 
 .reveal sup {
@@ -140,16 +141,15 @@ div.logo {
   align: left;
   }
 
-/* inserts footer */
-.footer {
+.reference-footnote {
   color: #555555 !important;
   text-align: left !important;
-  position: absolute !important;
+  position: fixed !important;
   left: 0px !important;
   bottom: 0px !important;
   padding: 10px !important;
   z-index: 100 !important;
-	font-size: .5em !important;
+	font-size: .6em !important;
 }
 
 .footer2 {
