@@ -1120,6 +1120,8 @@ library(httr)
 library(jsonlite)
 library(xml2)
 
+options(httr_oauth_cache = TRUE)
+
 # all of these packages are part of the tidyverse
 # so you could run:
 # install.packages(&#39;tidyverse&#39;); library(tidyverse)
@@ -1141,7 +1143,7 @@ resp
 </code></pre>
 
 <pre><code>Response [http://www.omdbapi.com/?t=The+Godfather&amp;plot=short&amp;r=xml]
-  Date: 2016-11-10 21:32
+  Date: 2016-11-10 21:42
   Status: 200
   Content-Type: text/xml; charset=utf-8
   Size: 843 B
@@ -1168,7 +1170,7 @@ resp
 </code></pre>
 
 <pre><code>Response [http://www.omdbapi.com/?s=The+Godfather&amp;plot=short&amp;r=xml]
-  Date: 2016-11-10 21:32
+  Date: 2016-11-10 21:42
   Status: 200
   Content-Type: text/xml; charset=utf-8
   Size: 2.17 kB
@@ -1330,10 +1332,45 @@ $user
 <li>The user authorizes a &ldquo;scope&rdquo; (breadth of services) to get token</li>
 </ul>
 
-<pre><code>Error in parse(text = x, srcfile = src) : &lt;text&gt;:14:1: unexpected symbol
-13:                                scope = c(&quot;https://www.googleapis.com/auth/drive&quot;)
-14: google_token
-    ^
+<pre><code>Warning message:
+package &#39;knitr&#39; was built under R version 3.2.4 
+
+
+processing file: index.Rpres
+
+Attaching package: &#39;dplyr&#39;
+
+The following objects are masked from &#39;package:stats&#39;:
+
+    filter, lag
+
+The following objects are masked from &#39;package:base&#39;:
+
+    intersect, setdiff, setequal, union
+
+
+Attaching package: &#39;purrr&#39;
+
+The following objects are masked from &#39;package:dplyr&#39;:
+
+    contains, order_by
+
+
+Attaching package: &#39;jsonlite&#39;
+
+The following object is masked from &#39;package:purrr&#39;:
+
+    flatten
+
+Quitting from lines 306-320 (index.Rpres) 
+Error: oauth_listener() needs an interactive environment.
+In addition: Warning messages:
+1: package &#39;dplyr&#39; was built under R version 3.2.5 
+2: package &#39;purrr&#39; was built under R version 3.2.5 
+3: package &#39;httr&#39; was built under R version 3.2.5 
+4: package &#39;jsonlite&#39; was built under R version 3.2.5 
+5: package &#39;xml2&#39; was built under R version 3.2.5 
+Execution halted
 </code></pre>
 
 </div>

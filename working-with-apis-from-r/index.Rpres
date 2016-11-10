@@ -173,6 +173,8 @@ library(httr)
 library(jsonlite)
 library(xml2)
 
+options(httr_oauth_cache = TRUE)
+
 # all of these packages are part of the tidyverse
 # so you could run:
 # install.packages('tidyverse'); library(tidyverse)
@@ -313,7 +315,7 @@ myapp <- oauth_app("google", key, secret)
 # this example requires a Google Drive account
 google_token <- oauth2.0_token(oauth_endpoints("google"), 
                                myapp,
-                               scope = c("https://www.googleapis.com/auth/drive")
+                               scope = c("https://www.googleapis.com/auth/drive"))
 google_token
 ```
 
