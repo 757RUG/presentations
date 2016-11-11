@@ -702,18 +702,23 @@ div.logo {
   align: left;
   }
 
-.reference-footnote {
+.attribution {
   color: #555555 !important;
   text-align: left !important;
   position: fixed !important;
+  width: 100%;
   left: 0px !important;
   bottom: 0px !important;
   padding: 10px !important;
-  z-index: 100 !important;
 	font-size: .6em !important;
 }
 
-.footer2 {
+.attribution-link {
+  position: absolute; 
+  z-index:1000 !important;
+}
+
+.reference {
   box-sizing: border-box !important;
   width: 100% !important;
   color: #555555 !important;
@@ -724,17 +729,15 @@ div.logo {
   padding: 10px !important;
   z-index: 100 !important;
 	font-size: 75% !important;
-}
-
-blockquote {
-  display: block !important;
+	display: block !important;
   margin-top: 10px !important;
   margin-bottom: 5px !important;
-  margin-left: 35px !important;
   margin-right: 35px !important;
   background-color: #cadef6 !important;
-  border-radius: 10px !important;
-  padding: 8px !important;
+  padding-top: 8px !important;
+  padding-bottom: 10px !important;
+  padding-left: 15px !important;
+  padding-right: 8px !important;
   border-color: #1f63b6 !important;
   border-width: 1px !important;
   border-style: solid !important;
@@ -992,12 +995,10 @@ hljs.initHighlightingOnLoad();
 <section data-transition="linear" data-transition-speed="default">
 <h3>2 Common Webservice API Types</h3>
 <div class="slideContent" >
-<div class="footer2">
-<blockquote cite="">
-<b>Resources:</b><br>
-<a href="http://spf13.com/post/soap-vs-rest">The Difference Between SOAP and REST</a><br>
-<a href="http://www.soapui.org/testing-dojo/world-of-api-testing/soap-vs--rest-challenges.html">SOAP vs REST Challenges</a>
-</blockquote>
+<div class="reference">
+  <b>Resources:</b><br>
+  <a href="http://spf13.com/post/soap-vs-rest">The Difference Between SOAP and REST</a><br>
+  <a href="http://www.soapui.org/testing-dojo/world-of-api-testing/soap-vs--rest-challenges.html">SOAP vs REST Challenges</a>
 </div>
 
 <p><div class="column column1 slideContent">
@@ -1066,11 +1067,9 @@ hljs.initHighlightingOnLoad();
 <section data-transition="linear" data-transition-speed="default">
 <h3>HTTP</h3>
 <div class="slideContent" >
-<div class="footer2">
-<blockquote cite="">
-<b>Resources:</b><br>
-<a href="https://github.com/ropensci/user2016-tutorial/blob/master/slides.pdf">Extracting data from the web: APIs and beyond</a>
-</blockquote>
+<div class="reference">
+  <b>Resources:</b><br>
+  <a href="https://github.com/ropensci/user2016-tutorial/blob/master/slides.pdf">Extracting data from the web: APIs and beyond</a>
 </div>
 
 <ul>
@@ -1133,8 +1132,10 @@ options(httr_oauth_cache = TRUE)
 <section data-transition="linear" data-transition-speed="default">
 <h3>API No Authentication (Just GET the URL)</h3>
 <div class="slideContent" >
-<div class="reference-footnote">
-  &nbsp;&nbsp;The Open Movie Database API at: <a href="http://www.omdbapi.com/">http://www.omdbapi.com/</a>
+<div class="attribution">
+  <div class="attribution-link">
+    &nbsp;&nbsp;The Open Movie Database API at: <a href="http://www.omdbapi.com/">http://www.omdbapi.com/</a>
+  </div>
 </div>
 
 <pre><code class="r">resp &lt;- GET(paste0(&#39;http://www.omdbapi.com/&#39;,
@@ -1143,7 +1144,7 @@ resp
 </code></pre>
 
 <pre><code>Response [http://www.omdbapi.com/?t=The+Godfather&amp;plot=short&amp;r=xml]
-  Date: 2016-11-10 22:02
+  Date: 2016-11-11 22:45
   Status: 200
   Content-Type: text/xml; charset=utf-8
   Size: 843 B
@@ -1170,10 +1171,10 @@ resp
 </code></pre>
 
 <pre><code>Response [http://www.omdbapi.com/?s=The+Godfather&amp;plot=short&amp;r=xml]
-  Date: 2016-11-10 22:02
+  Date: 2016-11-11 22:45
   Status: 200
   Content-Type: text/xml; charset=utf-8
-  Size: 2.17 kB
+  Size: 2.19 kB
 </code></pre>
 
 <pre><code class="r">parsed_xml &lt;- read_xml(content(resp, as=&quot;raw&quot;))
@@ -1393,7 +1394,7 @@ sprintf(&quot;%1.2f%%&quot;, 100 *
           as.numeric(your_drive_metadata$quotaBytesTotal))
 </code></pre>
 
-<pre><code>[1] &quot;2.35%&quot;
+<pre><code>[1] &quot;5.45%&quot;
 </code></pre>
 
 </div>
@@ -1402,8 +1403,11 @@ sprintf(&quot;%1.2f%%&quot;, 100 *
 <section data-transition="linear" data-transition-speed="default">
 <h3>Some more details on OAuth 2.0 Tokens</h3>
 <div class="column column1 slideContent" style="width: 48%;" >
-<div class="reference-footnote">
-  &nbsp;&nbsp;Image from a <span style="font-family: monospace; font-size: 95%;">googlesheets</span> packge vignette entitled: <a href="https://cran.r-project.org/web/packages/googlesheets/vignettes/managing-auth-tokens.html">&ldquo;Managing Auth Tokens&rdquo;</a>
+<div class="attribution">
+  <div class="attribution-link">
+    &nbsp;&nbsp;Image from a <span style="font-family: monospace; font-size: 95%;">googlesheets</span> packge vignette entitled: 
+    <a target="_blank" href="https://cran.r-project.org/web/packages/googlesheets/vignettes/managing-auth-tokens.html">Managing Auth Tokens</a>
+  </div>
 </div>
 
 <ul>

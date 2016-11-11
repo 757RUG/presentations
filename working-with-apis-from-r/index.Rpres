@@ -58,12 +58,10 @@ knitr::opts_chunk$set(echo=TRUE, eval=TRUE)
 2 Common Webservice API Types
 ====================================
 
-<div class="footer2">
-<blockquote cite="">
-<b>Resources:</b><br>
-<a href="http://spf13.com/post/soap-vs-rest">The Difference Between SOAP and REST</a><br>
-<a href="http://www.soapui.org/testing-dojo/world-of-api-testing/soap-vs--rest-challenges.html">SOAP vs REST Challenges</a>
-</blockquote>
+<div class="reference">
+  <b>Resources:</b><br>
+  <a href="http://spf13.com/post/soap-vs-rest">The Difference Between SOAP and REST</a><br>
+  <a href="http://www.soapui.org/testing-dojo/world-of-api-testing/soap-vs--rest-challenges.html">SOAP vs REST Challenges</a>
 </div>
 
 <div class="column column1 slideContent">
@@ -120,11 +118,9 @@ cat(jsonlite::toJSON(a, pretty=T, auto_unbox=TRUE))
 HTTP
 ====================================
 
-<div class="footer2">
-<blockquote cite="">
-<b>Resources:</b><br>
-<a href="https://github.com/ropensci/user2016-tutorial/blob/master/slides.pdf">Extracting data from the web: APIs and beyond</a>
-</blockquote>
+<div class="reference">
+  <b>Resources:</b><br>
+  <a href="https://github.com/ropensci/user2016-tutorial/blob/master/slides.pdf">Extracting data from the web: APIs and beyond</a>
 </div>
 
 <ul>
@@ -183,8 +179,10 @@ options(httr_oauth_cache = TRUE)
 API No Authentication (Just GET the URL)
 ====================================
 
-<div class="reference-footnote">
-  &nbsp;&nbsp;The Open Movie Database API at: <a href="http://www.omdbapi.com/">http://www.omdbapi.com/</a>
+<div class="attribution">
+  <div class="attribution-link">
+    &nbsp;&nbsp;The Open Movie Database API at: <a href="http://www.omdbapi.com/">http://www.omdbapi.com/</a>
+  </div>
 </div>
 
 ```{r, echo=TRUE, eval=TRUE}
@@ -346,8 +344,11 @@ Some more details on OAuth 2.0 Tokens
 ====================================
 left: 50%
 
-<div class="reference-footnote">
-  &nbsp;&nbsp;Image from a <span style="font-family: monospace; font-size: 95%;">googlesheets</span> packge vignette entitled: <a href="https://cran.r-project.org/web/packages/googlesheets/vignettes/managing-auth-tokens.html">"Managing Auth Tokens"</a>
+<div class="attribution">
+  <div class="attribution-link">
+    &nbsp;&nbsp;Image from a <span style="font-family: monospace; font-size: 95%;">googlesheets</span> packge vignette entitled: 
+    <a target="_blank" href="https://cran.r-project.org/web/packages/googlesheets/vignettes/managing-auth-tokens.html">Managing Auth Tokens</a>
+  </div>
 </div>
 
 * Your script is an "application" working on sombody's behalf
