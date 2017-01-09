@@ -1,0 +1,399 @@
+
+<!--- SET THE URL OF YOUR PRESENTATION. ---> 
+<!--- THIS WILL LOOK LIKE https://757rug.github.io/YOUR-PRESENTATION-NAME-HERE --->
+<meta property="og:url" content="https://757RUG.github.io/presentations/exploring-the-tidyverse" />
+
+<!--- MAKE THE TITLE THE SAME FOR THESE 2 METATAGS --->
+<meta property="og:title" content="Exploring the Tidyverse" />
+<meta name="twitter:title" content="Exploring the Tidyverse" />
+
+<!--- MAKE THE COVER IMAGE THE SAME FOR THESE 2 METATAGS --->
+<meta name="twitter:image" content="https://raw.githubusercontent.com/757rug/presentations/master/exploring-the-tidyverse/img/tidyverse.png" />
+<meta property="og:image" content="https://raw.githubusercontent.com/757rug/presentations/master/exploring-the-tidyverse/img/tidyverse.png" />
+
+<!--- MAKE THE DESCRIPTION THE SAME FOR ALL THESE METATAGS --->
+<meta name="description" content="An introduction to the tidyverse with examples on how to practice tidy data principles" />
+<meta name="twitter:description" content="An introduction to the tidyverse with examples on how to practice tidy data principles" />
+<meta property="og:description" content="An introduction to the tidyverse with examples on how to practice tidy data principles" />
+
+<!--- DONT TOUCH THESE METATAGS --->
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:site" content="@RUG757" />
+<meta name="twitter:creator" content="@RUG757" />
+<meta property="og:site_name" content="757 R Users Group" />
+
+<!--- CHANGE TO THE FILE PATH OF YOUR PRESENTATION IN THE REPOSITORY --->
+<!--- THIS WILL LOOK LIKE https://github.com/757RUG/presentations/tree/master/YOUR-PRESENTATION-NAME-HERE --->
+<a href="https://github.com/757RUG/presentations/tree/master/exploring-the-tidyverse"><img style="z-index: 1000; margin: 0px !important; max-height: 300px !important; position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
+
+<!--- DONT TOUCH --->
+<div class="logo">
+  <a href="http://www.meetup.com/757-R-Users-Group/" target="_blank">
+    <img src="../757-rug-logo.png" alt="757-rug-logo" />
+  </a>
+</div>
+
+<!--- DONT TOUCH --->
+<div class="copyright">
+  757 R Users Group: 
+  <a href="http://www.meetup.com/757-R-Users-Group/" target="_blank">
+    http://www.meetup.com/757-R-Users-Group/
+  </a>
+</div>
+
+Exploring the Tidyverse
+========================================
+author: Steve Mortimer
+date: `r gsub(" 0", " ", format(as.Date('2017-01-17'), format="%B %d, %Y"))`
+css: ../757-rug-presentations.css
+
+```{r setup, include=FALSE}
+options(stringsAsFactors = FALSE)
+library(knitr)
+knitr::opts_chunk$set(echo=TRUE, eval=TRUE, message = FALSE, warning = FALSE)
+library(tidyverse)
+```
+
+What is the tidyverse?
+====================================
+
+<div class="reference">
+These packages can work in harmony because they share common data representations and API design. 
+They strive towards "tidy" data and functions are <u>consistent</u> and <u>easily (human) readable</u>.
+</div>
+
+<br>
+It's a lifestyle embodied in a collection of R packages: 
+
+<img style="margin-left: 80px; margin-top: 30px; margin-bottom: 10px;" src="./img/tidyverse.png" />
+
+<br>
+
+More practically the tidyverse
+====================================
+
+<ol style="padding-left:60px;padding-top:20px;padding-bottom:0px;">
+  <li>Syncs package versions and warns compatibility</li>
+  <li>Runs fast  - most functions are written in C++</li>
+  <li>Smarter defaults - No factors in readr::read_csv()!</li>
+</ol>
+<br>
+
+<span style="color: black; border: 1px solid black; padding: 10px; border-radius: 5px 5px 5px;">
+  Tidyverse Core: ggplot2, dplyr, tidyr, tibble, readr, purrr
+</span>
+
+<u>Other functionality (packages):</u>
+
+<ul style="padding-left:60px;padding-top:10px;">
+  <li>Importing Data (haven, readxl, httr)</li>
+  <li>Manipulating Data (stringr, lubridate)</li>
+  <li>Modeling Data(modelr, broom)</li>
+</ul>
+
+
+Reducing Package Confusion
+====================================
+
+<br>
+<b>Left Join 2 data.frames</b>
+<br>
+
+`reshape2` package
+<div class="code-div">
+  merge(df1, df2, by.x = &#39;a1&#39;, by.y = &#39;a2&#39;, all.x = TRUE)
+</div>
+
+`data.table` package
+<div class="code-div">
+  df2[df1] # must set keys as well
+</div>
+
+`dplyr` package
+<div class="code-div">
+  left_join(df1, df2, by=c(&#39;a1&#39;=&#39;a2&#39;))
+</div>
+
+
+Reducing Package Confusion
+====================================
+
+<b>Warnings loading plyr after dplyr</b>
+<br>
+<img style="margin-left: 80px; margin-top: 50px; margin-bottom: 10px;" src="./img/plyr-dplyr-package-warnings.png" />
+
+
+Adhering to "tidy" Principles
+====================================
+
+Following three rules makes a dataset tidy:
+
+<ol style="padding-left:60px;padding-top:10px;">
+  <li>Variables are in columns</li>
+  <li>Observations are in rows</li>
+  <li>Values are in cells</li>
+</ol>
+
+<img style="margin-left: 100px; height: 250px;" src="http://r4ds.had.co.nz/images/tidy-1.png" />
+
+<div class="attribution">
+  <div class="attribution-link">
+    &nbsp;&nbsp;Paper in Journal of Statistical Software: 
+    <a target="_blank" href="http://www.jstatsoft.org/v59/i10/paper">Tidy Data</a> by Hadley Wickham<br>
+    &nbsp;&nbsp;Practical Tidying Examples: 
+    <a target="_blank" href="ftp://cran.r-project.org/pub/R/web/packages/tidyr/vignettes/tidy-data.html">ftp://cran.r-project.org/pub/R/web/packages/tidyr/vignettes/tidy-data.html</a>
+  </div>
+</div>
+
+
+Tidying Data
+====================================
+
+```{r, echo=FALSE, eval=TRUE}
+dat <- tibble(Country = c('Asia-China', 'Europe-Germany', 'Africa-Kenya'), 
+              `2014` = c(100, 110, 120), 
+              `2015` = c(10, 15, 20),
+              `2016` = c(40, 30, 20)
+              )
+```
+
+```{r, echo=FALSE}
+dat
+```
+
+<b>Column headers are values, not variable names</b><br>
+<b>Multiple variables stored in one column</b>
+
+```{r}
+dat %>% 
+  gather(-Country, key=Year, value=Data) %>%
+  separate(Country, c('Continent', 'Country'))
+```
+
+
+What is a tibble?
+====================================
+
+<br>
+You've seen it before in `dplyr` called `tbl_df`.<br>
+<br>
+`tibble` is a dedicated package for `tbl_df` features didn't belong in `dplyr` package.<br>
+<br> 
+What tibbles don't do:
+
+<ol style="padding-left:76px;padding-top:10px;">
+  <li>they never create row names</li>
+  <li>they never change the names of variables</li>
+  <li>they do not print everything by default</li>
+  <li>they handle types explicits (e.g. it never converts strings to factors!)</li>
+</ol>
+
+
+```{r, echo=FALSE, eval=TRUE}
+df_dat <- as.data.frame(dat)
+```
+
+Consistency! Tibbles return Tibbles
+====================================
+left: 50%
+
+With data frames, `[` can return a `data.frame` or a `vector`.
+
+```{r}
+is.data.frame(df_dat)
+df_dat[,2]
+is.vector(df_dat[,2])
+```
+
+***
+
+With tibbles, `[` always returns another tibble.
+
+```{r}
+is.tibble(dat)
+dat[,2]
+is.tibble(dat[2,2])
+```
+
+
+Pipelines
+====================================
+
+<br>
+The pipe, `%>%`, is a common composition tool that works across all tidyverse 
+packages. It sends the output of the left-hand side (LHS) function to the first 
+argument of the right-hand side (RHS) function.
+
+```{r}
+1:8 %>%
+  sum() %>% 
+  sqrt()
+```
+
+Why is this important in the tidyverse?<br><br>"Consistent and human readable". 
+Pipelines clearly outline the steps to transform, aggregate, select, etc.
+
+
+Pipelines - Counts across 2 columns
+====================================
+  
+```{r}
+table(mtcars$cyl, mtcars$am)
+```
+
+```{r}
+mtcars %>%
+  count(cyl, am) 
+```
+
+  
+Pipelines - Marginal Proportion
+====================================
+
+```{r}
+prop.table(table(mtcars$cyl, mtcars$am), margin=1)
+```
+
+```{r}
+mtcars %>%
+  count(cyl, am) %>%
+  group_by(cyl) %>%
+  mutate(pct_of_cyl = n / sum(n)) %>%
+  ungroup()
+```
+
+
+Pipelines - Flowing into ggplot
+====================================
+
+```{r, fig.align='center', fig.height=6, fig.width=8}
+dat %>%
+  gather(-Country, key=Year, value=Data) %>%
+  separate(Country, c('Continent', 'Country')) %>%
+  group_by(Year) %>%
+  mutate(Proportion = Data / sum(Data)) %>%
+  ggplot(aes(x = Year, y = Proportion, fill = Country)) + 
+  geom_bar(stat = "identity") + 
+  scale_y_continuous(labels = scales::percent)
+```
+
+
+```{r, echo=FALSE, eval=TRUE}
+movie_list <- list(movie1 = list(genre='comedy', sales_mm=28.32), 
+                   movie2 = list(genre='romance', sales_mm=93.14),
+                   movie3 = list(genre='comedy', sales_mm=41.68))
+```
+
+Pipelines - API Data Munging
+====================================
+
+<b>Sample of API Data</b>
+```{r}
+movie_list
+```
+
+
+Find Comedy Genre Total Sales
+====================================
+
+```{r}
+l2 <- lapply(movie_list, data.frame)
+final <- do.call(rbind, l2)
+final2 <- subset(final, genre=='comedy')
+sum(final2$sales_mm)
+
+final <- plyr::ldply(movie_list, data.frame)
+final2 <- plyr::ddply(final, c("genre"), 
+                      summarise,
+                      total_sales = sum(sales_mm))	   
+subset(final2, genre == 'comedy')
+
+movie_list %>%
+  map_df(., data.frame) %>%
+  filter(genre == 'comedy') %>%
+  summarize(total_sales = sum(sales_mm))
+```
+
+Using the "map" function
+====================================
+
+<br>
+`map` is the tidyverse equivalent to many \*apply functions in Base R and 
+\*\*ply functions in the `plyr` package.<br><br> `map` walks through the input, 
+supplying inputs to the function. Various output types can be returned:
+
+<ol style="padding-left:76px;padding-top:10px;">
+  <li>map() returns transformed input</li>
+  <li>map_df() returns a data.frame</li>
+  <li>map_lgl() map_chr(), map_int() return as certain types</li>
+</ol>
+
+
+Even Models can be "tidy"
+====================================
+
+```{r}
+library(broom)
+model <- lm(mpg ~ hp, data = mtcars)
+tidy(model)
+```
+
+```{r}
+summary(model)$r.squared # Base R way
+library(modelr)
+rsquare(model, mtcars) # tidyverse way
+```
+
+
+Bootstrapped 95% CI
+====================================
+
+We know `hp` has a statistically signficant relationship to `mpg`
+<div class="code-div">
+  &beta; = -0.06823, t(30) = -6.742, <i>p</i> < .001
+</div>
+What if we could not compute the standard error or CI? Alternatively, the test 
+for significance could be bootstrapped. 
+
+```{r}
+bootstrap(mtcars, 100) %>%
+  mutate(model = map(strap, ~ lm(mpg ~ hp, data = .))) %>% 
+  mutate(tidy_model = map(model, tidy)) %>% 
+	mutate(hp_estimate = map_dbl(tidy_model, . %>% 
+	                               filter(term == 'hp') %>% 
+	                               .$estimate)) %>%
+	summarize(lower = quantile(hp_estimate, .025),
+	          upper = quantile(hp_estimate, .975))
+```
+
+
+Fitting Partitioned Models
+====================================
+
+<br>
+Fit a separate linear regression by `cyl`:
+
+```{r}
+mtcars %>% 
+  split(.$cyl) %>%
+  map(~ lm(mpg ~ hp, data = .)) %>%
+  map_df(tidy, .id = "cylinder") %>%
+  arrange(term)
+```
+
+
+the-end
+====================================================
+title: false
+
+<h3>
+  <div class="midcenter" style="margin-left:-400px; margin-top:-200px;">
+    <span style="font-weight: 700; color:#25679E;">Welcome to the tidyverse lifestyle!</span>
+    <br>
+    <br>
+    <br>
+    <img style="margin-left:350px;" src="./img/rstudio-hex-purrr.png" />
+  </div>
+</h3>
+
