@@ -1394,14 +1394,14 @@ subset(final2, genre == &#39;comedy&#39;)
 <h3>Using the &quot;map&quot; function</h3>
 <div class="slideContent" >
 <p><br>
-<code>map</code> is the tidyverse equivalent to many *apply methods in Base R and 
-**ply in the <code>plyr</code> package.<br><br> <code>map</code> walks through the input, mapping the 
-function on the input. Various output types can be returned</p>
+<code>map</code> is the tidyverse equivalent to many *apply functions in Base R and 
+**ply functions in the <code>plyr</code> package.<br><br> <code>map</code> walks through the input, 
+supplying inputs to the function. Various output types can be returned:</p>
 
 <ol style="padding-left:76px;padding-top:10px;">
-  <li>map - returns transformed input</li>
-  <li>map_df - returns a data.frame</li>
-  <li>map_lgl, map_chr, map_int - returns as certain type</li>
+  <li>map() returns transformed input</li>
+  <li>map_df() returns a data.frame</li>
+  <li>map_lgl() map_chr(), map_int() return as certain types</li>
 </ol>
 
 </div>
@@ -1420,23 +1420,17 @@ tidy(model)
 2          hp -0.06822828 0.0101193 -6.742389 1.787835e-07
 </code></pre>
 
-<pre><code class="r">summary(model)$r.squared
+<pre><code class="r">summary(model)$r.squared # Base R way
 </code></pre>
 
 <pre><code>[1] 0.6024373
 </code></pre>
 
 <pre><code class="r">library(modelr)
-rsquare(model, mtcars)
+rsquare(model, mtcars) # tidyverse way
 </code></pre>
 
 <pre><code>[1] 0.6024373
-</code></pre>
-
-<pre><code class="r">mae(model, mtcars)
-</code></pre>
-
-<pre><code>[1] 2.907452
 </code></pre>
 
 </div>
@@ -1448,14 +1442,13 @@ rsquare(model, mtcars)
 <p>We know <code>hp</code> has a statistically signficant relationship to <code>mpg</code></p>
 
 <div class="code-div">
-  &beta; = -0.06823, t(30) = -6.742, <i>p</i><.001
+  &beta; = -0.06823, t(30) = -6.742, <i>p</i> < .001
 </div>
 
 <p>What if we could not compute the standard error or CI? Alternatively, the test 
 for significance could be bootstrapped. </p>
 
-<pre><code class="r">library(modelr)
-bootstrap(mtcars, 100) %&gt;%
+<pre><code class="r">bootstrap(mtcars, 100) %&gt;%
   mutate(model = map(strap, ~ lm(mpg ~ hp, data = .))) %&gt;% 
   mutate(tidy_model = map(model, tidy)) %&gt;% 
     mutate(hp_estimate = map_dbl(tidy_model, . %&gt;% 
@@ -1468,7 +1461,7 @@ bootstrap(mtcars, 100) %&gt;%
 <pre><code># A tibble: 1 × 2
         lower       upper
         &lt;dbl&gt;       &lt;dbl&gt;
-1 -0.09846614 -0.04693857
+1 -0.09861026 -0.05066187
 </code></pre>
 
 </div>
@@ -1495,6 +1488,24 @@ Fit a separate linear regression by <code>cyl</code>:</p>
 5        6          hp -0.007613269 0.02657760 -0.2864543 7.860202e-01
 6        8          hp -0.014244122 0.01390183 -1.0246218 3.257538e-01
 </code></pre>
+
+</div>
+
+</section>
+<section data-transition="linear" data-transition-speed="default">
+<h3>Resources</h3>
+<div class="slideContent" >
+<p><br></p>
+
+<ul>
+<li><a target="_blank" href="https://mran.microsoft.com/web/packages/tidyverse/vignettes/manifesto.html"><a href="https://mran.microsoft.com/web/packages/tidyverse/vignettes/manifesto.html">https://mran.microsoft.com/web/packages/tidyverse/vignettes/manifesto.html</a></a></li>
+<li><a target="_blank" href="http://stackoverflow.com/documentation/r/1395/tidyverse#t=2017010820463926237"><a href="http://stackoverflow.com/documentation/r/1395/tidyverse#t=2017010820463926237">http://stackoverflow.com/documentation/r/1395/tidyverse#t=2017010820463926237</a></a></li>
+<li>Paper on Tidy Principles: <a target="_blank" href="http://www.jstatsoft.org/v59/i10/paper"><a href="http://www.jstatsoft.org/v59/i10/paper">http://www.jstatsoft.org/v59/i10/paper</a></a></li>
+<li>R for Data Science: <a target="_blank" href="http://r4ds.had.co.nz/"><a href="http://r4ds.had.co.nz/">http://r4ds.had.co.nz/</a></a></li>
+<li><a target="_blank" href="https://github.com/michaellevy/tidyverse_talk/blob/master/tidyverse.md"><a href="https://github.com/michaellevy/tidyverse_talk/blob/master/tidyverse.md">https://github.com/michaellevy/tidyverse_talk/blob/master/tidyverse.md</a></a></li>
+<li><a target="_blank" href="https://blog.rstudio.org/2016/09/15/tidyverse-1-0-0/"><a href="https://blog.rstudio.org/2016/09/15/tidyverse-1-0-0/">https://blog.rstudio.org/2016/09/15/tidyverse-1-0-0/</a></a></li>
+<li><a target="_blank" href="https://monashbioinformaticsplatform.github.io/r-more/topics/tidyverse.html"><a href="https://monashbioinformaticsplatform.github.io/r-more/topics/tidyverse.html">https://monashbioinformaticsplatform.github.io/r-more/topics/tidyverse.html</a></a></li>
+</ul>
 
 </div>
 
