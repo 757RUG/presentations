@@ -55,6 +55,35 @@ knitr::opts_chunk$set(echo=TRUE, eval=TRUE, message = FALSE, warning = FALSE)
 library(shiny)
 ```
 
+What is Shiny?
+====================================
+
+* A web application framework for R
+* Written by Joe Cheng and RStudio
+* First CRAN package up in <a target="_blank" href="https://blog.rstudio.org/2012/11/08/introducing-shiny/">2012</a>
+* Delivers interactive experience over the web, all written in R!
+* Ready for the enterprise
+
+<div style="margin-top:50px; width: 1000px; height: 400px; overflow: hidden; position: relative;">
+  <iframe style="width: 1000px; height: 400px; top:-150px; left:0px; position: absolute;"  
+  src="https://www.rstudio.com/resources/customer-spotlight/" scrolling="no"></iframe>
+</div>
+
+
+Show me Shiny!
+====================================
+
+<iframe width="1000px;" height="600px;" scrolling="yes" src="https://gallery.shinyapps.io/086-bus-dashboard/"></iframe>
+
+<div class="attribution">
+  <div class="attribution-link">
+    &nbsp;&nbsp;User Showcase: 
+    <a target="_blank" href="https://www.rstudio.com/products/shiny/shiny-user-showcase/">https://www.rstudio.com/products/shiny/shiny-user-showcase/</a><br>
+   &nbsp;&nbsp;Show Me Shiny: 
+    <a target="_blank" href="https://www.showmeshiny.com">https://www.showmeshiny.com</a>
+  </div>
+</div>
+
 Prerequisites
 ====================================
 
