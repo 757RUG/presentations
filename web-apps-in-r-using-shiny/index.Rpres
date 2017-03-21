@@ -8,8 +8,8 @@
 <meta name="twitter:title" content="Web Apps in R Using Shiny" />
 
 <!--- MAKE THE COVER IMAGE THE SAME FOR THESE 2 METATAGS --->
-<meta name="twitter:image" content="https://raw.githubusercontent.com/757rug/presentations/master/exploring-the-tidyverse/img/tidyverse.png" />
-<meta property="og:image" content="https://raw.githubusercontent.com/757rug/presentations/master/exploring-the-tidyverse/img/tidyverse.png" />
+<meta name="twitter:image" content="https://raw.githubusercontent.com/757rug/presentations/master/web-apps-in-r-using-shiny/img/shiny-hex.png" />
+<meta property="og:image" content="https://raw.githubusercontent.com/757rug/presentations/master/web-apps-in-r-using-shiny/img/shiny-hex.png" />
 
 <!--- MAKE THE DESCRIPTION THE SAME FOR ALL THESE METATAGS --->
 <meta name="description" content="An introduction to building interactive web applications in R using the Shiny framework." />
