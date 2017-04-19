@@ -1,0 +1,711 @@
+---
+title: "Machine EARNINGS"
+subtitle: 'Machines Never Sleep'
+author: "Mike Buckley, Zack Fountas, Scott Katzbeck, Dan Ross-Li, Aaron Trent"
+date: '\today'
+output: 
+  pdf_document:
+  dev: cairo_pdf
+always_allow_html: yes
+fontsize: 12
+geometry: margin=0.8in
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(cache = TRUE)
+knitr::opts_chunk$set(include = FALSE)
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+```{r declarations, eval=TRUE}
+# Load helpful packages
+PackageList =c('MASS','gbm','tree','randomForest','rpart','caret','ROCR','readxl','data.table','R.utils', 'kknn', "glmnet", "ggplot2", "plotly", "maps") 
+NewPackages=PackageList[!(PackageList %in% installed.packages()[,"Package"])]
+#if(length(NewPackages)) install.packages(NewPackages)
+lapply(PackageList,require,character.only=TRUE)#array function
+
+# Declare Constants
+set.seed(99)
+```
+
+```{r prediction containers, eval=TRUE}
+phatT = list()
+phatV = list()
+```
+
+# 0) Overview  
+
+## Purpose:  
+
+Create an investible prediction model to forecast total returns of the loans available on Lending Club (LC). Goal of improving LC's "automated investing" feature. Our target is to maximize mean of top 200 returns, with ancillary goals of maximizing top 50 and top 10 returns.  
+
+## Data:  
+
+We use historical LC publicly available data from LC website.  
+*  Loans issued from 2012-2014  
+*  Only completed loans  
+
+#### Target variable(s):  
+
+* Annualized total returns (Total payments to lender less collection fees divided by loan amount) 
+* *Default - Explore in future* 
+
+#### Predictors:  
+
+* Loan application details 
+* Borrower characteristics 
+* *Text from loan description - Explore in future*
+
+## Process:  
+
+1) Prep, Clean and Feature Engineer
+2) Explore Data
+3) Modelling 
+4) Results 
+5) Conclusion 
+
+## Initial Hypothesis:  
+
+What predictors we think will be most important:  
+
+* Debt-to-Income (DTI) 
+* Loan Purpose (debt consolidation, major purchase, medical, etc.) 
+* Annual Income 
+* Employment Length 
+* Loan Grade/Subgrade 
+* Months since Last Delinquency 
+* Number of Accounts Open 
+
+
+# 1) Load and Prepare Data  
+
+## Load Data  
+Our first step is to load the data. Data can be downloaded from <https://www.lendingclub.com/info/download-data.action>. We downloaded all data from 2012 to 2014 and combined them into one data frame. Our initial data contained over 400K rows and 115 predictors. We load our data with a simple load statement shown below: 
+```{r load_data, eval = TRUE, include = TRUE, echo = TRUE}
+lc.raw = read.csv("LC_data_d.csv")
+```
+
+```{r load)data2, eval = TRUE}
+lc.df <- lc.raw
+```
+
+```{r function, eval = TRUE, include = TRUE, echo = FALSE}
+# create function to check rmse, which is in the units of the y variable
+rmse = function(y, yhat) {
+  mse = mean((y-yhat)^2)
+  rmse = (sqrt(mse))
+}
+```
+## Clean Data   
+#### Dropping Predictors  
+Next we clean our data. Our first pass at data cleaning involves eliminating predictors for one of four (4) reasons:  
+1) Useless variables that contain little information (loan id number, empty...)  
+2) Variables not in our scope but maybe useful in future (text,zip codes...)  
+3) Variables that are not available to investors at time of loan origination (Verification Status,Last payment...)  
+4) Response variables that are created when loans finish (Status, Final Payment Amount...)  
+
+```{r drop useless vars, eval = TRUE, include = TRUE, echo = TRUE, tidy = TRUE}
+# first, let's drop by name all the useless variables that are either ids, completely empty, or contain the same value for all loans
+drop.list = c("id", "member_id", "pymnt_plan", "url", "out_prncp", "out_prncp_inv", "next_pymnt_d", "policy_code", "application_type", "annual_inc_joint", "dti_joint", "verification_status_joint", "open_acc_6m", "open_il_6m", "open_il_12m", "open_il_24m", "mths_since_rcnt_il", "total_bal_il", "il_util", "open_rv_12m", "open_rv_24m", "max_bal_bc", "all_util", "inq_fi", "total_cu_tl", "inq_last_12m")
+lc.df = lc.df[,!(names(lc.df) %in% drop.list)]
+```
+
+```{r drop useless vars, other vars not availble to investors, and filter out non-completed loans, eval = TRUE}
+# also drop three variables with open-ended text description
+# We might use this for the future
+drop.list.2 = c("emp_title", "desc", "title", "zip_code")
+lc.df = lc.df[,!(names(lc.df) %in% drop.list.2)]
+
+# now drop the variables that are available in the historical LC file for analysis but not available to investors when choosing from available loans
+# note that we will use "funded_amt" to reflect the amount of the loan instead of "loan_amt" or "funded_amt_inv." but we will keep "loan_amt" in the data set because it reflects the amount requested for the loan and would be a key variable for investors choosing among loans
+# we will use "total_pymnt_inv" to calculate the total payments flowing to investors not "total_pymnt"
+drop.list.3 = c("total_pymnt", "funded_amnt_inv", "verification_status", "out_prncp", "out_prncp_inv", "next_pymnt_d", "last_credit_pull_d", "total_rec_prncp", "total_rec_int", "total_rec_late_fee", "recoveries", "last_pymnt_amnt", "delinq_amnt", "last_fico_range_high", "last_fico_range_low")
+lc.df = lc.df[,!(names(lc.df) %in% drop.list.3)]
+```
+
+#### Dropping Rows   
+After cleaning the predictors, we clean the rows. We only keep rows where our loan is 'completed', i.e. Fully Paid, Charged Off or Default.  
+
+```{r Clean Rows, eval = TRUE, include = TRUE, echo = TRUE, tidy = TRUE}
+lc.df = lc.df[(lc.df$loan_status=="Fully Paid" | lc.df$loan_status=="Charged Off" | lc.df$loan_status=="Default"),]
+```
+
+```{r set dates as date object in R, eval = TRUE}
+lc.df$last_pymnt_d <- as.Date(lc.df$last_pymnt_d, "%m/%d/%Y")
+lc.df$issue_d <- as.Date(lc.df$issue_d, "%m/%d/%Y")
+lc.df$earliest_cr_line <- as.Date(lc.df$earliest_cr_line, "%m/%d/%Y")
+```
+
+#### Creating New Response Variable   
+We create a new variable called "Total Returns" for the response variable. Total Returns is a calculation of annualized loan returns. To calculate, we take total payments to lenders (i.e. interest, principle, fees, and recoveries) less funded amount less collection fee and divide this by funded amount. This gives us a return figure for the loan. We then annualize this amount based on the time between last payment date and issue date.
+
+There were two major problems here: Some loans were repaid fully in a short amount of time (0/30 days), and some short term loans produced astronomically high annualized returns (1200% - 40%). For the former, 0 day loans produced infinite returns; to better model real cash flow, we put a floor of 3 days to simulate ACH time to clear transactions. For the latter, the short-term loans were actually fantastic investment mechanisms. We deduced that these borrowers were highly credit-worthy but pressed for liquidity (bridge financing). Therefore we kept these loans *with the added ambition that our model could ex-ante identify these loans*.
+
+```{r target total return prediction, eval = TRUE, include = TRUE, echo = TRUE}
+# here is the numerator of our total returns formula
+returns = (lc.df$total_pymnt_inv - lc.df$funded_amnt - lc.df$collection_recovery_fee)/lc.df$funded_amnt
+
+# deal with the cases where last_pymnt_d is missing
+missing <- is.na(lc.df$last_pymnt_d)
+lc.df$last_pymnt_d[missing] <- as.Date(lc.df$issue_d+150)[missing]
+
+# put a floor on time at 3 days, this is to prevent the error of 0 time
+# pmax takes max pairwise (rather than of whole series)
+time = pmax(as.numeric(lc.df$last_pymnt_d - lc.df$issue_d), 3)/365
+
+# now calcalate total returns
+tot.ret = (1 + returns)^(1/time) - 1
+```
+
+Example of amazing returns (Note the 12.11 is equivalent to 1211% annualized return!): 
+```{r total return prediction, eval = TRUE, include = TRUE}
+# add these new vars back to data frame
+lc.df$total_ret <- tot.ret
+
+# We see some crazy returns for really short term loans. Rather than throw them out, we keep them to assess if priori we can identify these high return ST loans.
+oo = order(lc.df$total_ret, decreasing = TRUE)
+print(head(lc.df[oo,c("last_pymnt_d", "issue_d", "total_pymnt_inv", "funded_amnt", "total_ret")], 20))
+
+# notes on calculating annualized total returns: 
+# if issue date and last payment date are the same, then the return is zero
+# if last payment date is blank, this person never made a payment in the first 150 days of the loan's existence, so it was charged off. the appropriate denominator is 150 days
+# also we cap the negative returns at -100% 
+```
+
+```{r quick look at returns; drop few crazy outliers, eval = TRUE}
+# Not great, average negative returns
+summary(lc.df$total_ret)
+
+# Over 4 billion in payments
+sum(lc.df$total_pymnt_inv)
+
+# As an aggregate, let's call this lending club 'market return' ~ 4.986%
+(sum(lc.df$total_pymnt_inv) - sum(as.numeric(lc.df$funded_amnt)) - sum(lc.df$collection_recovery_fee)) / sum(as.numeric(lc.df$funded_amnt))
+
+# check on outliers
+hist(lc.df$total_ret, main="Total Returns (Annualized)")
+boxplot(lc.df$total_ret, main="Total Returns (Annualized)")
+# there are clearly many outliers
+outlier = boxplot.stats(lc.df$total_ret)$out
+print(mean(outlier))
+# the average outlier is negative but there are a number of highly positive outliers too
+sort(lc.df$total_ret[lc.df$total_ret > 0.5], decreasing = TRUE)
+sort(lc.df$total_ret[lc.df$total_ret > 1.9], decreasing = TRUE)
+# 10 outliers have ~200% returns or higher; will drop these rows
+
+# drop crazy positive outlier rows
+lc.df = lc.df[(lc.df$total_ret < 1.9),]
+```
+
+```{r drop variables used to filter out non-completes and calculate returns, eval = TRUE}
+# dropping the vars that we use to filter out non-completed loans and calculate total annualized returns
+# these are "loan outcome" variables that will not be available when loans are issued 
+drop.list.4 = c("loan_status", "total_pymnt_inv", "funded_amnt", "collection_recovery_fee", "last_pymnt_d", "issue_d", "earliest_cr_line")
+lc.df = lc.df[,!(names(lc.df) %in% drop.list.4)]
+```
+
+## Feature Engineering   
+
+The last step is scanning and scrubbing predictors of missingness. We first examine missingness across our predictors and propose three methods for addressing missingness:  
+1) Mean Imputation  
+2) Missingness as a Factor (does the predictor have a value)  
+3) Exclude Missingness (ignore missingness)
+
+```{r examine NAs, eval = TRUE, include = TRUE, echo = TRUE}
+# create for loop to calculate % missing
+n = ncol(lc.df)
+miss = rep(0,n) #Store missingness
+for (i in 1:n){
+  CurrentColumn=lc.df[[i]]
+  missingness = mean(is.na(CurrentColumn))
+  miss[i] = missingness #Record percentage missingness
+}
+```
+
+```{r examine NAs 2, eval = TRUE}
+# inspect missingness
+#print(mean(miss)) # 8% of all cells are missing values
+#oo = order(miss, decreasing = TRUE)
+#print(names(lc.df)[oo][miss > 0]) # names of vars and their missing values
+#print(miss[oo])
+
+# 8 columns have > 10% NA's, all of which are numeric
+#print(names(lc.df)[miss > 0.1]) 
+numeric = sapply(lc.df, is.numeric)
+#print(names(lc.df)[miss > 0.1 & numeric=="FALSE"]) 
+
+# Next chunk of code will turn 6 of these into binned factors with the remaining two remaining numeric and relying on mean imputation
+```
+
+```{r recode one level of homeownership variable, eval = TRUE}
+table(lc.df$home_ownership, exclude=NULL)
+# because there is one observation in the "ANY" bucket, we'll run into prediction issues when we split train/valid/test
+lc.df$home_ownership[lc.df$home_ownership=="ANY"] = "OTHER"
+table(lc.df$home_ownership, exclude=NULL)
+lc.df$home_ownership = droplevels(lc.df$home_ownership)
+table(lc.df$home_ownership, exclude=NULL)
+```
+
+Additionally, we feature engineer and bin some numericals together to create new factors.  
+```{r recode numerical vars with high missingness into binned factors, echo = TRUE, eval = TRUE}
+# create custom function to bin numeric values into 12-month factor levels
+bin.cat = function(x, lower = 0, upper, by = 12,
+                   sep = "-", above.char = "+") {
+
+ labs = c(paste(seq(lower, upper - by, by = by),
+                 seq(lower + by - 1, upper - 1, by = by),
+                 sep = sep),
+           paste(upper, above.char, sep = ""))
+
+ cut(floor(x), breaks = c(seq(lower, upper, by = by), Inf),
+     right = FALSE, labels = labs)
+}
+```
+
+```{r recode, include = TRUE, eval = TRUE}
+# voila!
+#table(bin.cat(lc.df$mths_since_last_delinq, upper = 144), exclude = NULL)
+
+# now add recoded versions of the 6 vars to the lc.df data frame
+lc.df$mths_since_last_delinq = bin.cat(lc.df$mths_since_last_delinq, upper = 144)
+lc.df$mths_since_last_record = bin.cat(lc.df$mths_since_last_record, upper = 120)
+lc.df$mths_since_last_major_derog = bin.cat(lc.df$mths_since_last_major_derog, upper = 144)
+lc.df$mths_since_recent_bc_dlq = bin.cat(lc.df$mths_since_recent_bc_dlq, upper = 144)
+lc.df$mths_since_recent_revol_delinq = bin.cat(lc.df$mths_since_recent_revol_delinq, upper = 144)
+
+# create custom function to bin numeric values into 3-month factor levels
+bin.cat = function(x, lower = 0, upper, by = 3,
+                   sep = "-", above.char = "+") {
+
+ labs = c(paste(seq(lower, upper - by, by = by),
+                 seq(lower + by - 1, upper - 1, by = by),
+                 sep = sep),
+           paste(upper, above.char, sep = ""))
+
+ cut(floor(x), breaks = c(seq(lower, upper, by = by), Inf),
+     right = FALSE, labels = labs)
+}
+
+# voila!
+#table(bin.cat(lc.df$mths_since_recent_inq, upper = 24), exclude = NULL)
+
+# now add recoded version to the lc.df data frame
+lc.df$mths_since_recent_inq = bin.cat(lc.df$mths_since_recent_inq, upper = 24)
+
+drop.list.5 = c("mths_since_last_delinq", "mths_since_last_record", "mths_since_last_major_derog", "mths_since_recent_bc_dlq", "mths_since_recent_revol_delinq", "mths_since_recent_inq")
+lc.df = lc.df[,!(names(lc.df) %in% drop.list.5)]
+```
+
+```{r now fill in the NAs, eval = TRUE}
+# now we fill in the NAs by mean imputation (numeric) or by creating a new level like "Var"
+# fill in the values
+for (i in names(lc.df)){
+  CurrentColumn=lc.df[[i]]
+  idx=is.na(CurrentColumn)
+  CurrentColumn2=CurrentColumn[!idx]
+  if (is.numeric(CurrentColumn)){
+    # numerical value
+    CurrentColumn[idx]=mean(CurrentColumn2)
+    lc.df[[i]]=CurrentColumn
+  }else{
+    # categorical value
+    if (sum(idx)>0){
+    levels(CurrentColumn)=c(levels(CurrentColumn), paste(i,'_NA',sep=""))
+    CurrentColumn[idx]=paste(i,'_NA',sep="")
+    lc.df[[i]]=CurrentColumn
+    }
+  }
+}
+
+print(na_count <-sapply(lc.df, function(y) sum(length(which(is.na(y))))))
+# now none of the lc.df columns have missing values!
+```
+
+# 2) Data Exploration  
+
+Before we begin our modelling efforts, we take some time to explore the data set through visualization. 
+
+We suspect that since the interest rate of the loan depends on the credit rating of the borrower, that returns may also depend on the credit rating. A box plot of returns for each credit rating band seems to suggest that the proportion of loans with negative returns are increasing as credit rating decreases. This is likely due to a higher rate of default and resulting losses for poorly rated borrowers.
+
+```{r box plot by rating, include = TRUE, eval = TRUE, warning = FALSE}
+library(plotly)
+#Box plot of returns by LC credit rating
+boxplot(lc.df$total_ret~lc.df$grade, ylab="Return (%)", xlab="Credit Rating ('A' best to 'G' worst)")
+```
+
+We are also curious to see the distribution of the loans by loan amount. For this we create a simple bar chart. We notice spikes in loan counts at nearly every \$1k loan multiple, and even every \$500 loan multiple below \$10k. \$10k is the modal loan amount, followed by \$12k (we suspect this is due to borrowers desiring bundled \$1k "monthly" loans for rent, mortgages, auto, and other scheduled payments). We also notice a spike at \$35k, the maximum loan size. 
+
+```{r bar chart of loans by size, include = TRUE, eval = TRUE}
+#Bar chart of loans by size
+counts <- table(lc.df$loan_amnt)
+plot(counts, main="Loan Distribution by Size",
+   xlab="Loan Size", ylim= c(0,30000), axes= FALSE, ylab = "Count")
+axis(2, at = seq(0, 25000, 5000))
+axis(1, at = seq(0, 35000, 5000))
+```
+
+This makes us wonder if perhaps returns are related to loan size. We plot the data and see "Matrix" like lines at \$1k loan multiples, suggesting there is a fairly wide distribution of returns for each loan size creating the line effect.
+
+```{r plot of returns by loan size, include = TRUE, eval = TRUE}
+#Plot of returns by loan size
+plot(lc.df$loan_amnt,lc.df$total_ret, ylab="Return (%)", ylim = c(-1, 1), xlab="Loan Size", axes= TRUE, cex=0.02)
+```
+
+Our pair plots show the complexity of our data. There is no discernible relationship for some pairs of data. 
+
+```{r plot of returns by income, include = TRUE, eval = TRUE}
+#Plot of returns by annual income
+buck <- data.frame(lc.df$total_ret, lc.df$annual_inc,lc.df$loan_amnt,lc.df$int_rate)
+pairs(buck)
+```
+ 
+
+We also suspect that borrowers might have relatively high debt-to-income (DTI) ratios given that Lending Club is a more exotic form of borrowing; the platform is almost a "lender of last resort" presumably considered after traditional bank lending has been exhausted or refused. Interestingly, a histogram of the data suggests a roughly normal distribution with a slight right skew (i.e. high debt to income levels).
+
+```{r histogram of DTI, include = TRUE, eval = TRUE}
+#Histogram chart of DTI
+hist(lc.df$dti, ylim= c(0,50000), xlab = "DTI", main="")
+```
+
+We wonder if plotting in 3-D may reveal more interesting patterns in the loans and their returns. We decide to plot returns by both loan amount and annual income. We color code the points by credit grade. It is difficult to identify any patterns, although it does seem that large loans to individuals with high incomes and high credit ratings tend to generate mostly positive returns. 
+
+```{r 3D plot loan amount x annual income x returns, include = TRUE, eval = TRUE}
+# 3-D plot with loan amount, annual income and returns (grades with color)
+library(plotly)
+plot_ly(lc.df, x = ~loan_amnt, y = ~annual_inc, z = ~total_ret, color = ~grade, colors = c("green", "red")) %>%
+  add_markers() %>%
+  # add_surface(z = 0, opacity = 0.90) %>%
+  layout(scene = list(xaxis = list(title = 'Loan Amnt'),
+                     yaxis = list(title = 'Annual Inc', range = c(0,400000)),
+                     zaxis = list(title = 'Return')))
+```
+
+
+Finally, we wonder how loan returns vary by state. We compute average returns by state and create a "heat map" of returns. We notice returns for loans made in Mississipi seem to be more negative on average, and that returns for loans made in Maine seem to be more positive on average. Interestingly, this plot reveals there are no completed loans in North Dakota in our data set. 
+
+```{r return heat map by state, include = TRUE, eval = TRUE, warning = FALSE}
+#Attempted "Return Heat Map" by state
+
+library(ggplot2)
+library(maps)
+
+avg.ret.state = aggregate(lc.df$total_ret, by = list(lc.df$addr_state), mean)
+
+all_states <- map_data("state")
+
+Total = read.csv("avgstatereturnsmap.csv")
+Total[["avgretstate"]] = as.numeric(levels(Total$avg.ret.state))[Total$avg.ret.state]
+Total <- Total[Total$region!="district of columbia",]
+p <- ggplot()
+p <- p + geom_polygon(data=Total, aes(x=long, y=lat, group = group, fill=Total$avgretstate),colour="white") + scale_fill_continuous(low = "red", high = "darkgreen", guide="colorbar")
+P1 <- p + theme_bw()  + labs(fill = "Total Returns \n Weighted by Relative Population",title = "Returns by State", x="", y="")
+P1 + scale_y_continuous(breaks=c()) + scale_x_continuous(breaks=c()) + theme(panel.border = element_blank())
+``` 
+
+# 3) Modelling  
+
+## Train Valid Test  
+
+We split our data train/valid/test 50/30/20.
+```{r splits data into train/valid/test,eval = TRUE}
+# set aside 80% of full train dataset for training + validation, remaining 20% for testing
+n = nrow(lc.df)
+ntrain = .8*n
+tr = sample(1:n, ntrain)
+nvalid = .3*n
+vd = sample(1:ntrain, nvalid)
+
+temp = lc.df[tr,]
+trainandvalid = temp
+train = temp[-vd,]
+valid = temp[vd,]
+test = lc.df[-tr,]
+
+temp.fd = lc.raw[tr,c("funded_amnt")]
+trainandvalid.fd = temp.fd
+train.fd = temp.fd[-vd]
+valid.fd = temp.fd[vd]
+test.fd = lc.raw[-tr,c("funded_amnt")]
+```
+
+## Simple Linear Model  
+
+Our first model is a basket simple linear model. We do not expect this to perform well but use it to serve as a baseline for our more complex models. Most of our model code will fit a similar structure of creating the model and thereafter predicting the results. 
+
+```{r simple linear model, eval = TRUE, include = TRUE, echo = TRUE, warnings = FALSE}
+# create simple linear "kitchen sink" model as a baseline
+lc.lm = lm(train$total_ret~., data=train)
+# now predict
+phatV$lm = matrix(0.0,nrow(valid),1)
+phatV$lm = matrix(predict(lc.lm, valid))
+```
+
+## Lasso  
+
+We run a Lasso model which improves upon our linear model by "zeroing-out" weak predictors. We are left with a highly interpretable output. 
+```{r lasso model, include = TRUE, eval = TRUE}
+y = train$total_ret
+
+x = train[,!(colnames(train) %in% c("total_ret"))]
+x.mat = sparse.model.matrix(~.-1, data=x, contrasts.arg = lapply(x[,sapply(x, is.factor)], contrasts, contrasts=FALSE))
+
+glm_fit = cv.glmnet(x = x.mat, y = y, alpha = 1, nfold = 5)
+```
+
+```{r lasso plots,include = TRUE,eval = TRUE}
+plot(glm_fit)
+
+plot(glm_fit$glmnet.fit, xvar = "lambda", label = TRUE)
+abline(v = log(glm_fit$lambda.1se), lty=2, col="red")
+```
+
+Our first 10 coefficients:   
+```{r lasso fit and preds, include = TRUE,eval = TRUE}
+# let's look at the fit
+#coef(glm_fit, s = "lambda.1se")
+
+# here's a nifty function to display the non-zero betas in a neat table
+library(knitr)
+print_glmnet_coefs <- function(cvfit, s="lambda.1se") {
+    ind <- which(coef(cvfit, s=s) != 0)
+    df <- data.frame(
+        feature=rownames(coef(cvfit, s=s))[ind],
+        coeficient=coef(cvfit, s=s)[ind]
+    )
+    kable(df, digits =c(6))
+}
+head(print_glmnet_coefs(glm_fit), 10)
+```
+
+We notice that 36 month loans have a positive coefficient while 60 months loans have a negative coefficient. We also see the coefficient on interest rate is strongly positive, as one might expect (i.e. higher interest rate generally leads to higher returns). Finally, we see credit ratings appearing on the list, with the coefficient decreasing with rating.  
+
+```{r lasso predictions, include = TRUE,eval = TRUE}
+vx = valid[,!(colnames(valid) %in% c("total_ret"))]
+vx.mat = sparse.model.matrix(~.-1, data=vx, contrasts.arg = lapply(vx[,sapply(vx, is.factor)], contrasts, contrasts=FALSE))
+
+phatV$lasso = matrix(0.0,nrow(valid),1)
+phatV$lasso = predict(glm_fit, newx = vx.mat, type = "response", s = glm_fit$lambda.1se)
+```
+
+## KNN  
+Very difficult to run KNN. Unfortunately too many dimensions and some of the dimensions are factors. From our Lasso model we see a great deal of factor variables having high importance to our returns (such as term and grade). These factors cannot be well presented in KNN space; therefore we believe KNN to be of minimal value to the final product.  
+```{r KNN, eval = FALSE , echo = TRUE}
+knn.temp = data.frame(loan_amnt = valid$loan_amnt, installment = valid$installment) 
+near = kknn(total_ret~loan_amnt, train = train, knn.temp, k=300, kernel = "rectangular")
+
+plot(x = train$loan_amnt, y = train$total_ret, ylim = c(0, .4))
+lines(knn.temp,near$fitted,col="red",type="l")
+```
+
+## Random Forest  
+
+We run Random Forest with the parameters below:  
+```{r rfparams, eval = TRUE, include = TRUE, echo = TRUE}
+#Seetings for random forest
+p=ncol(train)-1
+mtryv = c(sqrt(p))
+ntreev = c(500,1000)
+nnodesize=c(100,200)
+```
+
+```{r Random Forest, include = TRUE, eval = TRUE}
+#random forest
+p=ncol(train)-1
+mtryv = c(sqrt(p))
+ntreev = c(500,1000)
+nnodesize=c(100,200)
+setrf = expand.grid(mtryv,ntreev,nnodesize) # this contains all settings to try
+colnames(setrf)=c("mtry","ntree",'nodesize')
+phatV$rf = matrix(0.0,nrow(valid),nrow(setrf)) # we will store results here
+ 
+for(i in 1:nrow(setrf)) {
+  #fit and predict
+  frf = randomForest(total_ret~., data=train,
+  mtry=setrf[i,1],
+  ntree=setrf[i,2],
+  nodesize=setrf[i,3], na.action=na.exclude)
+  phat = predict(frf, newdata=valid, type="response")
+  phatV$rf[,i]=phat
+}
+```
+
+```{r RF variable importance plot, include = FALSE}
+# hold for variable importance plot
+```
+
+## Boosting  
+
+We run boosting with the parameters below: 
+```{r boostparams, eval = TRUE, include = TRUE, echo = TRUE}
+# Settings for boosting
+idv = c(5, 10)
+ntv = c(500, 1000)
+shv = c(.01, .1)
+```
+
+```{r boosting, eval = TRUE}
+# Settings for boosting
+idv = c(5, 10)
+ntv = c(500, 1000)
+shv = c(.01, .1)
+setboost = expand.grid(idv,ntv,shv)
+colnames(setboost) = c("tdepth","ntree","shrink")
+phatV$boost = matrix(0.0,nrow(valid),nrow(setboost))
+
+# fit the boosting
+for(i in 1:nrow(setboost)) {
+  ##fit and predict
+  fboost = gbm(total_ret~., data=train, distribution="gaussian",
+               n.trees=setboost[i,2],
+               interaction.depth=setboost[i,1],
+               shrinkage=setboost[i,3])
+  
+  phat = predict(fboost,
+                 newdata=valid,
+                 n.trees=setboost[i,2],
+                 type="response")
+  
+  phatV$boost[,i] = phat
+}
+```
+
+# 4) Results   
+
+Boosting is the best model however RMSE is poor. One reason for this is defaults create a large error. If we implemented a two-step model, we believe we would be able to derive better results.  
+1) identify defaults  
+2) predict returns  
+*This is something to explore in the future.*    
+
+```{r RMSE plot, eval=TRUE, include=TRUE}
+read <- read.csv("C:/Users/Main/Dropbox/Business School/Machine Learning/output_lm.csv")
+tea <- matrix(read[,2])
+phatV$lm = tea
+
+lossL = list()
+nmethod = length(phatV)
+
+phatBest =matrix(0.0,nrow(valid),nmethod) #pick off best from each method
+colnames(phatBest) = names(phatV)
+
+for(i in 1:nmethod) {
+  nrun = ncol(phatV[[i]])
+  lvec = rep(0,nrun)
+    for(j in 1:nrun) lvec[j] = sqrt(mean((valid$total_ret-phatV[[i]][,j])^2))
+  lossL[[i]]=lvec; 
+  names(lossL)[i] = names(phatV)[i]
+  imin = which.min(lvec)
+  phatBest[,i] = phatV[[i]][,imin]
+}
+lossv = unlist(lossL)
+
+par(mfrow=c(1,1))
+plot(lossv, ylab="RMSE", type="n")
+nloss=0
+for(i in 1:nmethod) {
+  ii = nloss + 1:ncol(phatV[[i]])
+  points(ii,lossv[ii],col=i,pch=17)
+  nloss = nloss + ncol(phatV[[i]])
+}
+legend("topright",legend=names(phatV),col=1:nmethod,pch=rep(17,nmethod))
+```
+
+Pairs graph shows dispersion of results. Our RF and Boost models predict returns strongly in the -.3 to .2 range; highlighting an inability to target defaults. 
+
+```{r Refining Results3, eval=TRUE, include=TRUE}
+
+nmethod = length(phatV)
+phatBest =matrix(0.0,nrow(valid),nmethod) #pick off best from each method
+colnames(phatBest) = names(phatV)
+for(i in 1:nmethod) {
+  nrun = ncol(phatV[[i]])
+  lvec = rep(0,nrun)
+  for(j in 1:nrun) lvec[j] = rmse(valid$total_ret, phatV[[i]][,j])
+  imin = which.min(lvec)
+  phatBest[,i] = pmax(phatV[[i]][,imin], -1)
+}
+pairs(phatBest)
+```
+
+We were a little disheartened by our poor results. However we realized that our goal is not to predict all the results, but more so to predict the 'best' loans to invest in. Therefore a more relevant measure of our model(s) is how do they do identifying loans and generating returns. We hope that while our models may not accurately predict exact returns, the models have picked up on certain signals in the data and can identify loans with strong returns.  
+ 
+# 5) Conclusion   
+
+There are two ways to invest: one is a fixed amount into each loan (equally weighted like the Dow), another is a proportional amount (S&P500). The random returns for these strategies are ~0% and 5% respectively. 
+
+We take the lowest RMSE models as proxy of the 'best' in each class. All our models produce superior returns compared to random guessing. We use the equally weighted investment approach. Below are results from our validation set:   
+
+```{r Refining Results2, eval = TRUE, include = TRUE}
+oo = order(phatBest[,"lm"], decreasing = TRUE)
+temp.lm <- cumsum(valid[oo,"total_ret"])/seq(1, nrow(valid), 1)
+oo = order(phatBest[,"lasso"], decreasing = TRUE)
+temp.lasso <- cumsum(valid[oo,"total_ret"])/seq(1, nrow(valid), 1)
+oo = order(phatBest[,"rf"], decreasing = TRUE)
+temp.rf <- cumsum(valid[oo,"total_ret"])/seq(1, nrow(valid), 1)
+oo = order(phatBest[,"boost"], decreasing = TRUE)
+temp.boost <- cumsum(valid[oo,"total_ret"])/seq(1, nrow(valid), 1)
+
+rgy = range(temp.lm, temp.lasso, temp.rf, temp.boost)
+
+plot(temp.lm, type = 'l', ylim = rgy, xlab = "Loans", ylab = "Returns", main="Cumulative Returns (Equally weighted)")
+  lines(temp.lasso, col = "red")
+  lines(temp.rf, col = "green")
+  lines(temp.boost, col = "blue")
+legend("topright",legend=c("LM", "Lasso", "RF", "Boost"),col=c("black", "red", "green", "blue"), lty = 1)
+```
+
+We will not have the funds (at the onset!) to invest in all the loans, so we will limit our range to the Top 200. The Lending Club minimum investment amount is \$25, which means even with the Top 200, we would need an \$8000 initial investment. We also need to take risk into consideration. If we choose a high risk/high return strategy, we might limit our protfolio to the top 50 or even top 10 loans. However if we want to minimize the impact of a default, we might want to invest in a broader range of loans.
+
+Below we see that the optimal model depends on the number of loans we want to invest in. Random Forest performs well early (with <35 loans), while boosting holds an advantage at 50+ loans. 
+
+Overall we're able to target a >10% rate of return!  
+```{r Top 200, eval = TRUE, include = TRUE}
+
+plot(temp.lm[1:200], type = 'l', ylim = rgy, xlab = "Loans", ylab = "Returns",main="Top 200 Cumulative Returns")
+  lines(temp.lasso[1:200], col = "red")
+  lines(temp.rf[1:200], col = "green")
+  lines(temp.boost[1:200], col = "blue")
+legend("topright",legend=c("LM", "Lasso", "RF", "Boost"),col=c("black", "red", "green", "blue"), lty = 1)
+#temp <- cumsum((1+valid[oo,"total_ret"])*valid.fd[oo])/cumsum(valid.fd[oo])
+#plot(temp, type = 'l')
+```
+ 
+ 
+Overall, we elect to use our Boosting model, as it generates the best actual returns across models for the top 200 loans (based on model predicted returns).Training our Boosting model on training and validation data and running it on our test data, we find we would have achieved actual returns of 7.4% if we had invested in the top 200 loans based on predicted returns!   
+
+```{r Test, eval = TRUE, include = TRUE}
+lvec = rep(0,8)
+for(j in 1:8) lvec[j] = rmse(valid$total_ret, phatV[[4]][,j])
+imin = which.min(lvec)
+
+  fboost = gbm(total_ret~., data=trainandvalid, distribution="gaussian",
+               n.trees=setboost[imin,2],
+               interaction.depth=setboost[imin,1],
+               shrinkage=setboost[imin,3])
+  
+  phat = predict(fboost,
+                 newdata=test,
+                 n.trees=setboost[imin,2],
+                 type="response")
+
+  oo = order(phat, decreasing = TRUE)
+test.best <- cumsum(test[oo,"total_ret"])/seq(1, nrow(test), 1)
+```
+
+```{r Test Plot, eval = TRUE, include = TRUE}
+plot(test.best[1:200], type = 'l', ylim = rgy, xlab = "Loans", ylab = "Returns",main="Top 200 Cumulative Returns of Boost Test")
+```
+
+Please contact us directly if you would also like to invest.
+
+# A) Appendix  
+
+```{r Appendix Definitions, eval = TRUE, include = TRUE, echo=FALSE}
+
+lc.def = read.csv("LCDataDictionaryv5.csv")
+bucket <- as.matrix(lc.def[,2])
+rownames(bucket) <- lc.def[,1]
+colnames(bucket) <- names(lc.def)[2]
+#print(lc.def)
+kable(bucket, caption = "Definitions")
+```
